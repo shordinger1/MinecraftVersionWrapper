@@ -1,4 +1,4 @@
-package com.myname.mymodid;
+package shordinger.ModWrapper.config;
 
 import java.io.File;
 

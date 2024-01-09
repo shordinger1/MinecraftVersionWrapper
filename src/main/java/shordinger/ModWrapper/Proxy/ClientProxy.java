@@ -1,4 +1,4 @@
-package com.myname.mymodid;
+package shordinger.ModWrapper.Proxy;
 
 public class ClientProxy extends CommonProxy {
 
