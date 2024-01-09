@@ -1,0 +1,1462 @@
+package shordinger.ModWrapper.migration.wrapper.minecraft.world.chunk;
+
+import static shordinger.ModWrapper.ModWrapper.LOG;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.concurrent.ConcurrentLinkedQueue;
+
+import javax.annotation.Nullable;
+
+import net.minecraft.block.Block;
+import net.minecraft.block.material.Material;
+import net.minecraft.crash.CrashReport;
+import net.minecraft.crash.CrashReportCategory;
+import net.minecraft.entity.Entity;
+import net.minecraft.init.Blocks;
+import net.minecraft.network.PacketBuffer;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.ReportedException;
+import net.minecraft.world.EnumSkyBlock;
+import net.minecraft.world.World;
+import net.minecraft.world.WorldType;
+import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import com.google.common.base.Predicate;
+import com.google.common.collect.Queues;
+
+import cpw.mods.fml.common.Loader;
+import cpw.mods.fml.common.ModContainer;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
+import shordinger.ModWrapper.migration.wrapper.minecraft.block.state.IWrapperBlockState;
+import shordinger.ModWrapper.migration.wrapper.minecraft.init.Biomes;
+import shordinger.ModWrapper.migration.wrapper.minecraft.util.ClassInheritanceMultiMap;
+import shordinger.ModWrapper.migration.wrapper.minecraft.util.math.BlockPos;
+import shordinger.ModWrapper.migration.wrapper.minecraft.util.math.ChunkPos;
+import shordinger.ModWrapper.migration.wrapper.minecraft.world.WrapperWorld;
+import shordinger.ModWrapper.migration.wrapper.minecraft.world.biome.Biome;
+import shordinger.ModWrapper.migration.wrapper.minecraft.world.biome.BiomeProvider;
+import shordinger.ModWrapper.migration.wrapper.minecraftforge.common.capabilities.Capability;
+import shordinger.ModWrapper.migration.wrapper.minecraftforge.common.capabilities.CapabilityDispatcher;
+import shordinger.ModWrapper.migration.wrapper.minecraftforge.common.capabilities.ICapabilityProvider;
+
+public class WrapperChunk extends Chunk implements ICapabilityProvider {
+
+    private static final Logger LOGGER = LogManager.getLogger();
+    public static final ExtendedBlockStorage NULL_BLOCK_STORAGE = null;
+    /**
+     * Used to store block IDs, block MSBs, Sky-light maps, Block-light maps, and metadata. Each entry corresponds to a
+     * logical segment of 16x16x16 blocks, stacked vertically.
+     */
+    // private final ExtendedBlockStorage[] storageArrays;
+    // /** Contains a 16x16 mapping on the X/Z plane of the biome ID to which each colum belongs. */
+    // private final byte[] blockBiomeArray;
+    // /** A map, similar to heightMap, that tracks how far down precipitation can fall. */
+    // private final int[] precipitationHeightMap;
+    // /** Which columns need their skylightMaps updated. */
+    // private final boolean[] updateSkylightColumns;
+    // /** Whether or not this Chunk is currently loaded into the World */
+    // private boolean loaded;
+    // /** Reference to the World object. */
+    // private final World world;
+    // private final int[] heightMap;
+    // /** The x coordinate of the chunk. */
+    // public final int x;
+    // /** The z coordinate of the chunk. */
+    // public final int z;
+    // private boolean isGapLightingUpdated;
+    // /** A Map of ChunkPositions to TileEntities in this chunk */
+    private final Map<BlockPos, TileEntity> tileEntities;
+    /**
+     * Array of Lists containing the entities in this Chunk. Each List represents a 16 block subchunk.
+     */
+    private final ClassInheritanceMultiMap<Entity>[] entityLists;
+    /**
+     * Boolean value indicating if the terrain is populated.
+     */
+    // private boolean isTerrainPopulated;
+    // private boolean isLightPopulated;
+    // private boolean ticked;
+    // /** Set to true if the chunk has been modified and needs to be updated internally. */
+    // private boolean dirty;
+    // /** Whether this Chunk has any Entities and thus requires saving on every tick */
+    // private boolean hasEntities;
+    // /** The time according to World.worldTime when this chunk was last saved */
+    // private long lastSaveTime;
+    // /** Lowest value in the heightmap. */
+    private int heightMapMinimum;
+    /**
+     * the cumulative number of ticks players have been in this chunk
+     */
+    // private long inhabitedTime;
+    // /** Contains the current round-robin relight check index, and is implied as the relight check location as well.
+    // */
+    // private int queuedLightChecks;
+    // /** Queue containing the BlockPos of tile entities queued for creation */
+    private final ConcurrentLinkedQueue<BlockPos> tileEntityPosQueue;
+    public boolean unloadQueued;
+
+    public WrapperChunk(WrapperWorld worldIn, int x, int z) {
+        super(worldIn, x, z);
+        // this.storageArrays = new ExtendedBlockStorage[16];
+        // this.blockBiomeArray = new byte[256];
+        // this.precipitationHeightMap = new int[256];
+        // this.updateSkylightColumns = new boolean[256];
+        // this.tileEntities = Maps.<BlockPos, TileEntity>newHashMap();
+        // this.queuedLightChecks = 4096;
+        this.tileEntityPosQueue = Queues.newConcurrentLinkedQueue();
+        // this.entityLists = (ClassInheritanceMultiMap[])(new ClassInheritanceMultiMap[16]);
+        // getWorld() = worldIn;
+        // this.x = x;
+        // this.z = z;
+        // this.heightMap = new int[256];
+
+        // for (int i = 0; i < this.entityLists.length; ++i)
+        // {
+        // this.entityLists[i] = new ClassInheritanceMultiMap(Entity.class);
+        // }
+        //
+        // Arrays.fill(this.precipitationHeightMap, -999);
+        // Arrays.fill(this.blockBiomeArray, (byte) - 1);
+        capabilities = net.minecraftforge.event.ForgeEventFactory.gatherCapabilities(this);// TODO
+    }
+
+    public WrapperChunk(WrapperWorld worldIn, ChunkPrimer primer, int x, int z) {
+        this(worldIn, x, z);
+        int i = 256;
+        boolean flag = worldIn.provider.hasSkyLight();
+
+        for (int j = 0; j < 16; ++j) {
+            for (int k = 0; k < 16; ++k) {
+                for (int l = 0; l < 256; ++l) {
+                    IWrapperBlockState iblockstate = primer.getBlockState(j, l, k);
+
+                    if (iblockstate.getMaterial() != Material.AIR) {
+                        int i1 = l >> 4;
+
+                        if (this.storageArrays[i1] == NULL_BLOCK_STORAGE) {
+                            this.storageArrays[i1] = new ExtendedBlockStorage(i1 << 4, flag);
+                        }
+
+                        this.storageArrays[i1].set(j, l & 15, k, iblockstate);
+                    }
+                }
+            }
+        }
+    }
+
+    public int getHeight(BlockPos pos) {
+        return this.getHeightValue(pos.getX() & 15, pos.getZ() & 15);
+    }
+
+    @Nullable
+    private ExtendedBlockStorage getLastExtendedBlockStorage() {
+        for (int i = this.storageArrays.length - 1; i >= 0; --i) {
+            if (this.storageArrays[i] != NULL_BLOCK_STORAGE) {
+                return this.storageArrays[i];
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Returns the topmost ExtendedBlockStorage instance for this Chunk that actually contains a block.
+     */
+    public int getTopFilledSegment() {
+        ExtendedBlockStorage extendedblockstorage = this.getLastExtendedBlockStorage();
+        return extendedblockstorage == null ? 0 : extendedblockstorage.getYLocation();
+    }
+
+    /**
+     * Generates the height map for a chunk from scratch
+     */
+    @SideOnly(Side.CLIENT)
+    public void generateHeightMap() {
+        int i = this.getTopFilledSegment();
+        this.heightMapMinimum = Integer.MAX_VALUE;
+
+        for (int j = 0; j < 16; ++j) {
+            for (int k = 0; k < 16; ++k) {
+                this.precipitationHeightMap[j + (k << 4)] = -999;
+
+                for (int l = i + 16; l > 0; --l) {
+                    IWrapperBlockState iblockstate = this.getBlockState(j, l - 1, k);
+
+                    if (this.getBlockLightOpacity(j, l - 1, k) != 0) {
+                        this.heightMap[k << 4 | j] = l;
+
+                        if (l < this.heightMapMinimum) {
+                            this.heightMapMinimum = l;
+                        }
+
+                        break;
+                    }
+                }
+            }
+        }
+
+        this.isModified = true;
+    }
+
+    /**
+     * Generates the initial skylight map for the chunk upon generation or load.
+     */
+    public void generateSkylightMap() {
+        int i = this.getTopFilledSegment();
+        this.heightMapMinimum = Integer.MAX_VALUE;
+
+        for (int j = 0; j < 16; ++j) {
+            for (int k = 0; k < 16; ++k) {
+                this.precipitationHeightMap[j + (k << 4)] = -999;
+
+                for (int l = i + 16; l > 0; --l) {
+                    if (this.getBlockLightOpacity(j, l - 1, k) != 0) {
+                        this.heightMap[k << 4 | j] = l;
+
+                        if (l < this.heightMapMinimum) {
+                            this.heightMapMinimum = l;
+                        }
+
+                        break;
+                    }
+                }
+
+                if (this.getWorld().provider.hasSkyLight()) {
+                    int k1 = 15;
+                    int i1 = i + 16 - 1;
+
+                    while (true) {
+                        int j1 = this.getBlockLightOpacity(j, i1, k);
+
+                        if (j1 == 0 && k1 != 15) {
+                            j1 = 1;
+                        }
+
+                        k1 -= j1;
+
+                        if (k1 > 0) {
+                            ExtendedBlockStorage extendedblockstorage = this.storageArrays[i1 >> 4];
+
+                            if (extendedblockstorage != NULL_BLOCK_STORAGE) {
+                                extendedblockstorage.setSkyLight(j, i1 & 15, k, k1);
+                                getWorld().notifyLightSet(new BlockPos((this.x << 4) + j, i1, (this.z << 4) + k));
+                            }
+                        }
+
+                        --i1;
+
+                        if (i1 <= 0 || k1 <= 0) {
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        this.dirty = true;
+    }
+
+    /**
+     * Propagates a given sky-visible block's light value downward and upward to neighboring blocks as necessary.
+     */
+    private void propagateSkylightOcclusion(int x, int z) {
+        this.updateSkylightColumns[x + z * 16] = true;
+        this.isGapLightingUpdated = true;
+    }
+
+    private void recheckGaps(boolean onlyOne) {
+        getWorld().profiler.startSection("recheckGaps");
+
+        if (getWorld().isAreaLoaded(new BlockPos(this.x * 16 + 8, 0, this.z * 16 + 8), 16)) {
+            for (int i = 0; i < 16; ++i) {
+                for (int j = 0; j < 16; ++j) {
+                    if (this.updateSkylightColumns[i + j * 16]) {
+                        this.updateSkylightColumns[i + j * 16] = false;
+                        int k = this.getHeightValue(i, j);
+                        int l = this.x * 16 + i;
+                        int i1 = this.z * 16 + j;
+                        int j1 = Integer.MAX_VALUE;
+
+                        for (EnumFacing enumfacing : EnumFacing.Plane.HORIZONTAL) {
+                            j1 = Math.min(
+                                j1,
+                                getWorld().getChunksLowestHorizon(
+                                    l + enumfacing.getFrontOffsetX(),
+                                    i1 + enumfacing.getFrontOffsetZ()));
+                        }
+
+                        this.checkSkylightNeighborHeight(l, i1, j1);
+
+                        for (EnumFacing enumfacing1 : EnumFacing.Plane.HORIZONTAL) {
+                            this.checkSkylightNeighborHeight(
+                                l + enumfacing1.getFrontOffsetX(),
+                                i1 + enumfacing1.getFrontOffsetZ(),
+                                k);
+                        }
+
+                        if (onlyOne) {
+                            getWorld().profiler.endSection();
+                            return;
+                        }
+                    }
+                }
+            }
+
+            this.isGapLightingUpdated = false;
+        }
+
+        getWorld().profiler.endSection();
+    }
+
+    /**
+     * Checks the height of a block next to a sky-visible block and schedules a lighting update as necessary.
+     */
+    private void checkSkylightNeighborHeight(int x, int z, int maxValue) {
+        int i = getWorld().getHeight(new BlockPos(x, 0, z))
+            .getY();
+
+        if (i > maxValue) {
+            this.updateSkylightNeighborHeight(x, z, maxValue, i + 1);
+        } else if (i < maxValue) {
+            this.updateSkylightNeighborHeight(x, z, i, maxValue + 1);
+        }
+    }
+
+    private void updateSkylightNeighborHeight(int x, int z, int startY, int endY) {
+        if (endY > startY && getWorld().isAreaLoaded(new BlockPos(x, 0, z), 16)) {
+            for (int i = startY; i < endY; ++i) {
+                getWorld().checkLightFor(EnumSkyBlock.SKY, new BlockPos(x, i, z));
+            }
+
+            this.dirty = true;
+        }
+    }
+
+    /**
+     * Initiates the recalculation of both the block-light and sky-light for a given block inside a chunk.
+     */
+    private void relightBlock(int x, int y, int z) {
+        int i = this.heightMap[z << 4 | x] & 255;
+        int j = i;
+
+        if (y > i) {
+            j = y;
+        }
+
+        while (j > 0 && this.getBlockLightOpacity(x, j - 1, z) == 0) {
+            --j;
+        }
+
+        if (j != i) {
+            getWorld().markBlocksDirtyVertical(x + this.x * 16, z + this.z * 16, j, i);
+            this.heightMap[z << 4 | x] = j;
+            int k = this.x * 16 + x;
+            int l = this.z * 16 + z;
+
+            if (getWorld().provider.hasSkyLight()) {
+                if (j < i) {
+                    for (int j1 = j; j1 < i; ++j1) {
+                        ExtendedBlockStorage extendedblockstorage2 = this.storageArrays[j1 >> 4];
+
+                        if (extendedblockstorage2 != NULL_BLOCK_STORAGE) {
+                            extendedblockstorage2.setSkyLight(x, j1 & 15, z, 15);
+                            getWorld().notifyLightSet(new BlockPos((this.x << 4) + x, j1, (this.z << 4) + z));
+                        }
+                    }
+                } else {
+                    for (int i1 = i; i1 < j; ++i1) {
+                        ExtendedBlockStorage extendedblockstorage = this.storageArrays[i1 >> 4];
+
+                        if (extendedblockstorage != NULL_BLOCK_STORAGE) {
+                            extendedblockstorage.setSkyLight(x, i1 & 15, z, 0);
+                            getWorld().notifyLightSet(new BlockPos((this.x << 4) + x, i1, (this.z << 4) + z));
+                        }
+                    }
+                }
+
+                int k1 = 15;
+
+                while (j > 0 && k1 > 0) {
+                    --j;
+                    int i2 = this.getBlockLightOpacity(x, j, z);
+
+                    if (i2 == 0) {
+                        i2 = 1;
+                    }
+
+                    k1 -= i2;
+
+                    if (k1 < 0) {
+                        k1 = 0;
+                    }
+
+                    ExtendedBlockStorage extendedblockstorage1 = this.storageArrays[j >> 4];
+
+                    if (extendedblockstorage1 != NULL_BLOCK_STORAGE) {
+                        extendedblockstorage1.setSkyLight(x, j & 15, z, k1);
+                    }
+                }
+            }
+
+            int l1 = this.heightMap[z << 4 | x];
+            int j2 = i;
+            int k2 = l1;
+
+            if (l1 < i) {
+                j2 = l1;
+                k2 = i;
+            }
+
+            if (l1 < this.heightMapMinimum) {
+                this.heightMapMinimum = l1;
+            }
+
+            if (getWorld().provider.hasSkyLight()) {
+                for (EnumFacing enumfacing : EnumFacing.Plane.HORIZONTAL) {
+                    this.updateSkylightNeighborHeight(
+                        k + enumfacing.getFrontOffsetX(),
+                        l + enumfacing.getFrontOffsetZ(),
+                        j2,
+                        k2);
+                }
+
+                this.updateSkylightNeighborHeight(k, l, j2, k2);
+            }
+
+            this.dirty = true;
+        }
+    }
+
+    public int getBlockLightOpacity(BlockPos pos) {
+        return this.getBlockState(pos)
+            .getLightOpacity(getWorld(), pos);
+    }
+
+    private int getBlockLightOpacity(int x, int y, int z) {
+        IWrapperBlockState state = this.getBlockState(x, y, z); // Forge: Can sometimes be called before we are added to
+                                                                // the global world list. So use the less accurate one
+                                                                // during that. It'll be recalculated later
+        return !loaded ? state.getLightOpacity()
+            : state.getLightOpacity(world, new BlockPos(this.x << 4 | x & 15, y, this.z << 4 | z & 15));
+    }
+
+    public IWrapperBlockState getBlockState(BlockPos pos) {
+        return this.getBlockState(pos.getX(), pos.getY(), pos.getZ());
+    }
+
+    public IWrapperBlockState getBlockState(final int x, final int y, final int z) {
+        if (getWorld().getWorldType() == WorldType.DEBUG_ALL_BLOCK_STATES) {
+            IWrapperBlockState iblockstate = null;
+
+            if (y == 60) {
+                iblockstate = Blocks.BARRIER.getDefaultState();
+            }
+
+            if (y == 70) {
+                iblockstate = ChunkGeneratorDebug.getBlockStateFor(x, z);
+            }
+
+            return iblockstate == null ? Blocks.AIR.getDefaultState() : iblockstate;
+        } else {
+            try {
+                if (y >= 0 && y >> 4 < this.storageArrays.length) {
+                    ExtendedBlockStorage extendedblockstorage = this.storageArrays[y >> 4];
+
+                    if (extendedblockstorage != NULL_BLOCK_STORAGE) {
+                        return extendedblockstorage.get(x & 15, y & 15, z & 15);
+                    }
+                }
+
+                return Blocks.AIR.getDefaultState();
+            } catch (Throwable throwable) {
+                CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Getting block state");
+                CrashReportCategory crashreportcategory = crashreport.makeCategory("Block being got");
+                crashreportcategory.addDetail("Location", new ICrashReportDetail<String>() {
+
+                    public String call() throws Exception {
+                        return CrashReportCategory.getCoordinateInfo(x, y, z);
+                    }
+                });
+                throw new ReportedException(crashreport);
+            }
+        }
+    }
+
+    @Nullable
+    public IWrapperBlockState setBlockState(BlockPos pos, IWrapperBlockState state) {
+        int i = pos.getX() & 15;
+        int j = pos.getY();
+        int k = pos.getZ() & 15;
+        int l = k << 4 | i;
+
+        if (j >= this.precipitationHeightMap[l] - 1) {
+            this.precipitationHeightMap[l] = -999;
+        }
+
+        int i1 = this.heightMap[l];
+        IWrapperBlockState iblockstate = this.getBlockState(pos);
+
+        if (iblockstate == state) {
+            return null;
+        } else {
+            Block block = state.getBlock();
+            Block block1 = iblockstate.getBlock();
+            int k1 = iblockstate.getLightOpacity(getWorld(), pos); // Relocate old light value lookup here, so that it
+                                                                   // is called before TE is removed.
+            ExtendedBlockStorage extendedblockstorage = this.storageArrays[j >> 4];
+            boolean flag = false;
+
+            if (extendedblockstorage == NULL_BLOCK_STORAGE) {
+                if (block == Blocks.AIR) {
+                    return null;
+                }
+
+                extendedblockstorage = new ExtendedBlockStorage(j >> 4 << 4, getWorld().provider.hasSkyLight());
+                this.storageArrays[j >> 4] = extendedblockstorage;
+                flag = j >= i1;
+            }
+
+            extendedblockstorage.set(i, j & 15, k, state);
+
+            // if (block1 != block)
+            {
+                if (!getWorld().isRemote) {
+                    if (block1 != block) // Only fire block breaks when the block changes.
+                        block1.breakBlock(getWorld(), pos, iblockstate);
+                    TileEntity te = this.getTileEntity(pos, WrapperChunk.EnumCreateEntityType.CHECK);
+                    if (te != null && te.shouldRefresh(getWorld(), pos, iblockstate, state))
+                        getWorld().removeTileEntity(pos);
+                } else if (block1.hasTileEntity(iblockstate)) {
+                    TileEntity te = this.getTileEntity(pos, WrapperChunk.EnumCreateEntityType.CHECK);
+                    if (te != null && te.shouldRefresh(getWorld(), pos, iblockstate, state))
+                        getWorld().removeTileEntity(pos);
+                }
+            }
+
+            if (extendedblockstorage.get(i, j & 15, k)
+                .getBlock() != block) {
+                return null;
+            } else {
+                if (flag) {
+                    this.generateSkylightMap();
+                } else {
+                    int j1 = state.getLightOpacity(getWorld(), pos);
+
+                    if (j1 > 0) {
+                        if (j >= i1) {
+                            this.relightBlock(i, j + 1, k);
+                        }
+                    } else if (j == i1 - 1) {
+                        this.relightBlock(i, j, k);
+                    }
+
+                    if (j1 != k1 && (j1 < k1 || this.getLightFor(EnumSkyBlock.SKY, pos) > 0
+                        || this.getLightFor(EnumSkyBlock.BLOCK, pos) > 0)) {
+                        this.propagateSkylightOcclusion(i, k);
+                    }
+                }
+
+                // If capturing blocks, only run block physics for TE's. Non-TE's are handled in
+                // ForgeHooks.onPlaceItemIntoWorld
+                if (!getWorld().isRemote && block1 != block
+                    && (!getWorld().captureBlockSnapshots || block.hasTileEntity(state))) {
+                    block.onBlockAdded(getWorld(), pos, state);
+                }
+
+                if (block.hasTileEntity(state)) {
+                    TileEntity tileentity1 = this.getTileEntity(pos, WrapperChunk.EnumCreateEntityType.CHECK);
+
+                    if (tileentity1 == null) {
+                        tileentity1 = block.createTileEntity(getWorld(), state);
+                        getWorld().setTileEntity(pos, tileentity1);
+                    }
+
+                    if (tileentity1 != null) {
+                        tileentity1.updateContainingBlockInfo();
+                    }
+                }
+
+                this.dirty = true;
+                return iblockstate;
+            }
+        }
+    }
+
+    public int getLightFor(EnumSkyBlock type, BlockPos pos) {
+        int i = pos.getX() & 15;
+        int j = pos.getY();
+        int k = pos.getZ() & 15;
+        ExtendedBlockStorage extendedblockstorage = this.storageArrays[j >> 4];
+
+        if (extendedblockstorage == NULL_BLOCK_STORAGE) {
+            return this.canSeeSky(pos) ? type.defaultLightValue : 0;
+        } else if (type == EnumSkyBlock.SKY) {
+            return !getWorld().provider.hasSkyLight() ? 0 : extendedblockstorage.getSkyLight(i, j & 15, k);
+        } else {
+            return type == EnumSkyBlock.BLOCK ? extendedblockstorage.getBlockLight(i, j & 15, k)
+                : type.defaultLightValue;
+        }
+    }
+
+    public void setLightFor(EnumSkyBlock type, BlockPos pos, int value) {
+        int i = pos.getX() & 15;
+        int j = pos.getY();
+        int k = pos.getZ() & 15;
+        ExtendedBlockStorage extendedblockstorage = this.storageArrays[j >> 4];
+
+        if (extendedblockstorage == NULL_BLOCK_STORAGE) {
+            extendedblockstorage = new ExtendedBlockStorage(j >> 4 << 4, getWorld().provider.hasSkyLight());
+            this.storageArrays[j >> 4] = extendedblockstorage;
+            this.generateSkylightMap();
+        }
+
+        this.dirty = true;
+
+        if (type == EnumSkyBlock.SKY) {
+            if (getWorld().provider.hasSkyLight()) {
+                extendedblockstorage.setSkyLight(i, j & 15, k, value);
+            }
+        } else if (type == EnumSkyBlock.BLOCK) {
+            extendedblockstorage.setBlockLight(i, j & 15, k, value);
+        }
+    }
+
+    public int getLightSubtracted(BlockPos pos, int amount) {
+        int i = pos.getX() & 15;
+        int j = pos.getY();
+        int k = pos.getZ() & 15;
+        ExtendedBlockStorage extendedblockstorage = this.storageArrays[j >> 4];
+
+        if (extendedblockstorage == NULL_BLOCK_STORAGE) {
+            return getWorld().provider.hasSkyLight() && amount < EnumSkyBlock.SKY.defaultLightValue
+                ? EnumSkyBlock.SKY.defaultLightValue - amount
+                : 0;
+        } else {
+            int l = !getWorld().provider.hasSkyLight() ? 0 : extendedblockstorage.getSkyLight(i, j & 15, k);
+            l = l - amount;
+            int i1 = extendedblockstorage.getBlockLight(i, j & 15, k);
+
+            if (i1 > l) {
+                l = i1;
+            }
+
+            return l;
+        }
+    }
+
+    /**
+     * Adds an entity to the chunk.
+     */
+    public void addEntity(Entity entityIn) {
+        this.hasEntities = true;
+        int i = MathHelper.floor(entityIn.posX / 16.0D);
+        int j = MathHelper.floor(entityIn.posZ / 16.0D);
+
+        if (i != this.x || j != this.z) {
+            LOGGER.warn(
+                "Wrong location! ({}, {}) should be ({}, {}), {}",
+                Integer.valueOf(i),
+                Integer.valueOf(j),
+                Integer.valueOf(this.x),
+                Integer.valueOf(this.z),
+                entityIn);
+            entityIn.setDead();
+        }
+
+        int k = MathHelper.floor(entityIn.posY / 16.0D);
+
+        if (k < 0) {
+            k = 0;
+        }
+
+        if (k >= this.entityLists.length) {
+            k = this.entityLists.length - 1;
+        }
+
+        net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(
+            new net.minecraftforge.event.entity.EntityEvent.EnteringChunk(
+                entityIn,
+                this.x,
+                this.z,
+                entityIn.chunkCoordX,
+                entityIn.chunkCoordZ));
+        entityIn.addedToChunk = true;
+        entityIn.chunkCoordX = this.x;
+        entityIn.chunkCoordY = k;
+        entityIn.chunkCoordZ = this.z;
+        this.entityLists[k].add(entityIn);
+        this.markDirty(); // Forge - ensure chunks are marked to save after an entity add
+    }
+
+    /**
+     * removes entity using its y chunk coordinate as its index
+     */
+    public void removeEntity(Entity entityIn) {
+        this.removeEntityAtIndex(entityIn, entityIn.chunkCoordY);
+    }
+
+    /**
+     * Removes entity at the specified index from the entity array.
+     */
+    public void removeEntityAtIndex(Entity entityIn, int index) {
+        if (index < 0) {
+            index = 0;
+        }
+
+        if (index >= this.entityLists.length) {
+            index = this.entityLists.length - 1;
+        }
+
+        this.entityLists[index].remove(entityIn);
+        this.markDirty(); // Forge - ensure chunks are marked to save after entity removals
+    }
+
+    public boolean canSeeSky(BlockPos pos) {
+        int i = pos.getX() & 15;
+        int j = pos.getY();
+        int k = pos.getZ() & 15;
+        return j >= this.heightMap[k << 4 | i];
+    }
+
+    @Nullable
+    private TileEntity createNewTileEntity(BlockPos pos) {
+        IWrapperBlockState iblockstate = this.getBlockState(pos);
+        Block block = iblockstate.getBlock();
+        return !block.hasTileEntity(iblockstate) ? null : block.createTileEntity(getWorld(), iblockstate);
+    }
+
+    @Nullable
+    public TileEntity getTileEntity(BlockPos pos, WrapperChunk.EnumCreateEntityType creationMode) {
+        TileEntity tileentity = this.tileEntities.get(pos);
+
+        if (tileentity != null && tileentity.isInvalid()) {
+            tileEntities.remove(pos);
+            tileentity = null;
+        }
+
+        if (tileentity == null) {
+            if (creationMode == WrapperChunk.EnumCreateEntityType.IMMEDIATE) {
+                tileentity = this.createNewTileEntity(pos);
+                getWorld().setTileEntity(pos, tileentity);
+            } else if (creationMode == WrapperChunk.EnumCreateEntityType.QUEUED) {
+                this.tileEntityPosQueue.add(pos.toImmutable());
+            }
+        }
+
+        return tileentity;
+    }
+
+    public void addTileEntity(TileEntity tileEntityIn) {
+        this.addTileEntity(tileEntityIn.getPos(), tileEntityIn);
+
+        if (this.loaded) {
+            getWorld().addTileEntity(tileEntityIn);
+        }
+    }
+
+    public void addTileEntity(BlockPos pos, TileEntity tileEntityIn) {
+        if (tileEntityIn.getWorld() != getWorld()) // Forge don't call unless it's changed, could screw up bad mods.
+            tileEntityIn.setWorld(getWorld());
+        tileEntityIn.setPos(pos);
+
+        if (this.getBlockState(pos)
+            .getBlock()
+            .hasTileEntity(this.getBlockState(pos))) {
+            if (this.tileEntities.containsKey(pos)) {
+                ((TileEntity) this.tileEntities.get(pos)).invalidate();
+            }
+
+            tileEntityIn.validate();
+            this.tileEntities.put(pos, tileEntityIn);
+        }
+    }
+
+    public void removeTileEntity(BlockPos pos) {
+        if (this.loaded) {
+            TileEntity tileentity = this.tileEntities.remove(pos);
+
+            if (tileentity != null) {
+                tileentity.invalidate();
+            }
+        }
+    }
+
+    /**
+     * Called when this Chunk is loaded by the ChunkProvider
+     */
+    public void onLoad() {
+        this.loaded = true;
+        getWorld().addTileEntities(this.tileEntities.values());
+
+        for (ClassInheritanceMultiMap<Entity> classinheritancemultimap : this.entityLists) {
+            getWorld().loadEntities(com.google.common.collect.ImmutableList.copyOf(classinheritancemultimap));
+        }
+        net.minecraftforge.common.MinecraftForge.EVENT_BUS
+            .post(new net.minecraftforge.event.world.ChunkEvent.Load(this));
+    }
+
+    /**
+     * Called when this Chunk is unloaded by the ChunkProvider
+     */
+    public void onUnload() {
+        java.util.Arrays.stream(entityLists)
+            .forEach(
+                multimap -> com.google.common.collect.Lists
+                    .newArrayList(multimap.getByClass(net.minecraft.entity.player.EntityPlayer.class))
+                    .forEach(player -> world.updateEntityWithOptionalForce(player, false))); // FORGE - Fix for MC-92916
+        this.loaded = false;
+
+        for (TileEntity tileentity : this.tileEntities.values()) {
+            getWorld().markTileEntityForRemoval(tileentity);
+        }
+
+        for (ClassInheritanceMultiMap<Entity> classinheritancemultimap : this.entityLists) {
+            getWorld().unloadEntities(classinheritancemultimap);
+        }
+        net.minecraftforge.common.MinecraftForge.EVENT_BUS
+            .post(new net.minecraftforge.event.world.ChunkEvent.Unload(this));
+    }
+
+    /**
+     * Sets the isModified flag for this Chunk
+     */
+    public void markDirty() {
+        this.dirty = true;
+    }
+
+    /**
+     * Fills the given list of all entities that intersect within the given bounding box that aren't the passed entity.
+     */
+    public void getEntitiesWithinAABBForEntity(@Nullable Entity entityIn, AxisAlignedBB aabb, List<Entity> listToFill,
+        Predicate<? super Entity> filter) {
+        int i = MathHelper.floor((aabb.minY - World.MAX_ENTITY_RADIUS) / 16.0D);
+        int j = MathHelper.floor((aabb.maxY + World.MAX_ENTITY_RADIUS) / 16.0D);
+        i = MathHelper.clamp(i, 0, this.entityLists.length - 1);
+        j = MathHelper.clamp(j, 0, this.entityLists.length - 1);
+
+        for (int k = i; k <= j; ++k) {
+            if (!this.entityLists[k].isEmpty()) {
+                for (Entity entity : this.entityLists[k]) {
+                    if (entity.getEntityBoundingBox()
+                        .intersects(aabb) && entity != entityIn) {
+                        if (filter == null || filter.apply(entity)) {
+                            listToFill.add(entity);
+                        }
+
+                        Entity[] aentity = entity.getParts();
+
+                        if (aentity != null) {
+                            for (Entity entity1 : aentity) {
+                                if (entity1 != entityIn && entity1.getEntityBoundingBox()
+                                    .intersects(aabb) && (filter == null || filter.apply(entity1))) {
+                                    listToFill.add(entity1);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Gets all entities that can be assigned to the specified class.
+     */
+    public <T extends Entity> void getEntitiesOfTypeWithinAABB(Class<? extends T> entityClass, AxisAlignedBB aabb,
+        List<T> listToFill, Predicate<? super T> filter) {
+        int i = MathHelper.floor((aabb.minY - World.MAX_ENTITY_RADIUS) / 16.0D);
+        int j = MathHelper.floor((aabb.maxY + World.MAX_ENTITY_RADIUS) / 16.0D);
+        i = MathHelper.clamp(i, 0, this.entityLists.length - 1);
+        j = MathHelper.clamp(j, 0, this.entityLists.length - 1);
+
+        for (int k = i; k <= j; ++k) {
+            for (T t : this.entityLists[k].getByClass(entityClass)) {
+                if (t.getEntityBoundingBox()
+                    .intersects(aabb) && (filter == null || filter.apply(t))) {
+                    listToFill.add(t);
+                }
+            }
+        }
+    }
+
+    /**
+     * Returns true if this Chunk needs to be saved
+     */
+    public boolean needsSaving(boolean p_76601_1_) {
+        if (p_76601_1_) {
+            if (this.hasEntities && getWorld().getTotalWorldTime() != this.lastSaveTime || this.dirty) {
+                return true;
+            }
+        } else if (this.hasEntities && getWorld().getTotalWorldTime() >= this.lastSaveTime + 600L) {
+            return true;
+        }
+
+        return this.dirty;
+    }
+
+    public Random getRandomWithSeed(long seed) {
+        return new Random(
+            getWorld().getSeed() + (long) (this.x * this.x * 4987142)
+                + (long) (this.x * 5947611)
+                + (long) (this.z * this.z) * 4392871L
+                + (long) (this.z * 389711) ^ seed);
+    }
+
+    public boolean isEmpty() {
+        return false;
+    }
+
+    public void populate(IChunkProvider chunkProvider, IChunkGenerator chunkGenrator) {
+        WrapperChunk wrapperChunk = chunkProvider.getLoadedChunk(this.x, this.z - 1);
+        WrapperChunk wrapperChunk1 = chunkProvider.getLoadedChunk(this.x + 1, this.z);
+        WrapperChunk wrapperChunk2 = chunkProvider.getLoadedChunk(this.x, this.z + 1);
+        WrapperChunk wrapperChunk3 = chunkProvider.getLoadedChunk(this.x - 1, this.z);
+
+        if (wrapperChunk1 != null && wrapperChunk2 != null
+            && chunkProvider.getLoadedChunk(this.x + 1, this.z + 1) != null) {
+            this.populate(chunkGenrator);
+        }
+
+        if (wrapperChunk3 != null && wrapperChunk2 != null
+            && chunkProvider.getLoadedChunk(this.x - 1, this.z + 1) != null) {
+            wrapperChunk3.populate(chunkGenrator);
+        }
+
+        if (wrapperChunk != null && wrapperChunk1 != null
+            && chunkProvider.getLoadedChunk(this.x + 1, this.z - 1) != null) {
+            wrapperChunk.populate(chunkGenrator);
+        }
+
+        if (wrapperChunk != null && wrapperChunk3 != null) {
+            WrapperChunk wrapperChunk4 = chunkProvider.getLoadedChunk(this.x - 1, this.z - 1);
+
+            if (wrapperChunk4 != null) {
+                wrapperChunk4.populate(chunkGenrator);
+            }
+        }
+    }
+
+    protected void populate(IChunkGenerator generator) {
+        if (populating != null && net.minecraftforge.common.ForgeModContainer.logCascadingWorldGeneration)
+            logCascadingWorldGeneration();
+        ChunkPos prev = populating;
+        populating = this.getPos();
+        if (this.isTerrainPopulated()) {
+            if (generator.generateStructures(this, this.x, this.z)) {
+                this.markDirty();
+            }
+        } else {
+            this.checkLight();
+            generator.populate(this.x, this.z);
+            net.minecraftforge.fml.common.registry.GameRegistry
+                .generateWorld(this.x, this.z, getWorld(), generator, getWorld().getChunkProvider());
+            this.markDirty();
+        }
+        populating = prev;
+    }
+
+    public BlockPos getPrecipitationHeight(BlockPos pos) {
+        int i = pos.getX() & 15;
+        int j = pos.getZ() & 15;
+        int k = i | j << 4;
+        BlockPos blockpos = new BlockPos(pos.getX(), this.precipitationHeightMap[k], pos.getZ());
+
+        if (blockpos.getY() == -999) {
+            int l = this.getTopFilledSegment() + 15;
+            blockpos = new BlockPos(pos.getX(), l, pos.getZ());
+            int i1 = -1;
+
+            while (blockpos.getY() > 0 && i1 == -1) {
+                IWrapperBlockState iblockstate = this.getBlockState(blockpos);
+                Material material = iblockstate.getMaterial();
+
+                if (!material.blocksMovement() && !material.isLiquid()) {
+                    blockpos = blockpos.down();
+                } else {
+                    i1 = blockpos.getY() + 1;
+                }
+            }
+
+            this.precipitationHeightMap[k] = i1;
+        }
+
+        return new BlockPos(pos.getX(), this.precipitationHeightMap[k], pos.getZ());
+    }
+
+    public void onTick(boolean skipRecheckGaps) {
+        if (this.isGapLightingUpdated && getWorld().provider.hasSkyLight() && !skipRecheckGaps) {
+            this.recheckGaps(getWorld().isRemote);
+        }
+
+        this.ticked = true;
+
+        if (!this.isLightPopulated && this.isTerrainPopulated) {
+            this.checkLight();
+        }
+
+        while (!this.tileEntityPosQueue.isEmpty()) {
+            BlockPos blockpos = this.tileEntityPosQueue.poll();
+
+            if (this.getTileEntity(blockpos, WrapperChunk.EnumCreateEntityType.CHECK) == null
+                && this.getBlockState(blockpos)
+                    .getBlock()
+                    .hasTileEntity(this.getBlockState(blockpos))) {
+                TileEntity tileentity = this.createNewTileEntity(blockpos);
+                getWorld().setTileEntity(blockpos, tileentity);
+                getWorld().markBlockRangeForRenderUpdate(blockpos, blockpos);
+            }
+        }
+    }
+
+    public boolean isPopulated() {
+        return this.ticked && this.isTerrainPopulated && this.isLightPopulated;
+    }
+
+    public boolean wasTicked() {
+        return this.ticked;
+    }
+
+    /**
+     * Gets a {@link ChunkPos} representing the x and z coordinates of this chunk.
+     */
+    public ChunkPos getPos() {
+        return new ChunkPos(this.x, this.z);
+    }
+
+    /**
+     * Returns whether the ExtendedBlockStorages containing levels (in blocks) from arg 1 to arg 2 are fully empty
+     * (true) or not (false).
+     */
+    public boolean isEmptyBetween(int startY, int endY) {
+        if (startY < 0) {
+            startY = 0;
+        }
+
+        if (endY >= 256) {
+            endY = 255;
+        }
+
+        for (int i = startY; i <= endY; i += 16) {
+            ExtendedBlockStorage extendedblockstorage = this.storageArrays[i >> 4];
+
+            if (extendedblockstorage != NULL_BLOCK_STORAGE && !extendedblockstorage.isEmpty()) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public void setStorageArrays(ExtendedBlockStorage[] newStorageArrays) {
+        if (this.storageArrays.length != newStorageArrays.length) {
+            LOGGER.warn(
+                "Could not set level chunk sections, array length is {} instead of {}",
+                Integer.valueOf(newStorageArrays.length),
+                Integer.valueOf(this.storageArrays.length));
+        } else {
+            System.arraycopy(newStorageArrays, 0, this.storageArrays, 0, this.storageArrays.length);
+        }
+    }
+
+    /**
+     * Loads this chunk from the given buffer.
+     *
+     * @see net.minecraft.network.play.server.SPacketChunkData#getReadBuffer()
+     */
+    @SideOnly(Side.CLIENT)
+    public void read(PacketBuffer buf, int availableSections, boolean groundUpContinuous) {
+        for (TileEntity tileEntity : tileEntities.values()) {
+            tileEntity.updateContainingBlockInfo();
+            tileEntity.getBlockMetadata();
+            tileEntity.getBlockType();
+        }
+
+        boolean flag = getWorld().provider.hasSkyLight();
+
+        for (int i = 0; i < this.storageArrays.length; ++i) {
+            ExtendedBlockStorage extendedblockstorage = this.storageArrays[i];
+
+            if ((availableSections & 1 << i) == 0) {
+                if (groundUpContinuous && extendedblockstorage != NULL_BLOCK_STORAGE) {
+                    this.storageArrays[i] = NULL_BLOCK_STORAGE;
+                }
+            } else {
+                if (extendedblockstorage == NULL_BLOCK_STORAGE) {
+                    extendedblockstorage = new ExtendedBlockStorage(i << 4, flag);
+                    this.storageArrays[i] = extendedblockstorage;
+                }
+
+                extendedblockstorage.getData()
+                    .read(buf);
+                buf.readBytes(
+                    extendedblockstorage.getBlockLight()
+                        .getData());
+
+                if (flag) {
+                    buf.readBytes(
+                        extendedblockstorage.getSkyLight()
+                            .getData());
+                }
+            }
+        }
+
+        if (groundUpContinuous) {
+            buf.readBytes(this.blockBiomeArray);
+        }
+
+        for (int j = 0; j < this.storageArrays.length; ++j) {
+            if (this.storageArrays[j] != NULL_BLOCK_STORAGE && (availableSections & 1 << j) != 0) {
+                this.storageArrays[j].recalculateRefCounts();
+            }
+        }
+
+        this.isLightPopulated = true;
+        this.isTerrainPopulated = true;
+        this.generateHeightMap();
+
+        List<TileEntity> invalidList = new java.util.ArrayList<TileEntity>();
+
+        for (TileEntity tileentity : this.tileEntities.values()) {
+            if (tileentity.shouldRefresh(
+                getWorld(),
+                tileentity.getPos(),
+                tileentity.getBlockType()
+                    .getStateFromMeta(tileentity.getBlockMetadata()),
+                getBlockState(tileentity.getPos()))) invalidList.add(tileentity);
+            tileentity.updateContainingBlockInfo();
+        }
+
+        for (TileEntity te : invalidList) te.invalidate();
+    }
+
+    public Biome getBiome(BlockPos pos, BiomeProvider provider) {
+        int i = pos.getX() & 15;
+        int j = pos.getZ() & 15;
+        int k = this.blockBiomeArray[j << 4 | i] & 255;
+
+        if (k == 255) {
+            // Forge: checking for client ensures that biomes are only generated on integrated server
+            // in singleplayer. Generating biomes on the client may corrupt the biome ID arrays on
+            // the server while they are being generated because IntCache can't be thread safe,
+            // so client and server may end up filling the same array.
+            // This is not necessary in 1.13 and newer versions.
+            Biome biome = world.isRemote ? Biomes.PLAINS : provider.getBiome(pos, Biomes.PLAINS);
+            k = Biome.getIdForBiome(biome);
+            this.blockBiomeArray[j << 4 | i] = (byte) (k & 255);
+        }
+
+        Biome biome1 = Biome.getBiome(k);
+        return biome1 == null ? Biomes.PLAINS : biome1;
+    }
+
+    /**
+     * Accepts a 256-entry array that contains a 16x16 mapping on the X/Z plane of block positions in this Chunk to
+     * biome IDs.
+     */
+    public void setBiomeArray(byte[] biomeArray) {
+        if (this.blockBiomeArray.length != biomeArray.length) {
+            LOGGER.warn(
+                "Could not set level chunk biomes, array length is {} instead of {}",
+                Integer.valueOf(biomeArray.length),
+                Integer.valueOf(this.blockBiomeArray.length));
+        } else {
+            System.arraycopy(biomeArray, 0, this.blockBiomeArray, 0, this.blockBiomeArray.length);
+        }
+    }
+
+    /**
+     * Called once-per-chunk-per-tick, and advances the round-robin relight check index by up to 8 blocks at a time. In
+     * a worst-case scenario, can potentially take up to 25.6 seconds, calculated via (4096/8)/20, to re-check all
+     * blocks in a chunk, which may explain lagging light updates on initial world generation.
+     */
+    public void enqueueRelightChecks() {// TODO
+        if (this.queuedLightChecks < 4096) {
+            BlockPos blockpos = new BlockPos(this.x << 4, 0, this.z << 4);
+
+            for (int i = 0; i < 8; ++i) {
+                if (this.queuedLightChecks >= 4096) {
+                    return;
+                }
+
+                int j = this.queuedLightChecks % 16;
+                int k = this.queuedLightChecks / 16 % 16;
+                int l = this.queuedLightChecks / 256;
+                ++this.queuedLightChecks;
+
+                for (int i1 = 0; i1 < 16; ++i1) {
+                    BlockPos blockpos1 = blockpos.add(k, (j << 4) + i1, l);
+                    boolean flag = i1 == 0 || i1 == 15 || k == 0 || k == 15 || l == 0 || l == 15;
+
+                    if (this.storageArrays[j] == NULL_BLOCK_STORAGE && flag
+                        || this.storageArrays[j] != NULL_BLOCK_STORAGE && this.storageArrays[j].get(k, i1, l)
+                            .getBlock()
+                            .isAir(this.storageArrays[j].get(k, i1, l), getWorld(), blockpos1)) {
+                        for (EnumFacing enumfacing : EnumFacing.values()) {
+                            BlockPos blockpos2 = blockpos1.offset(enumfacing);
+
+                            if (getWorld().getBlockState(blockpos2)
+                                .getLightValue(getWorld(), blockpos2) > 0) {
+                                getWorld().checkLight(blockpos2);
+                            }
+                        }
+
+                        getWorld().checkLight(blockpos1);
+                    }
+                }
+            }
+        }
+    }
+
+    public void checkLight() {
+        this.isTerrainPopulated = true;
+        this.isLightPopulated = true;
+        BlockPos blockpos = new BlockPos(this.xPosition << 4, 0, this.zPosition << 4);
+
+        if (getWorld().provider.hasSkyLight()) {
+            if (getWorld().isAreaLoaded(blockpos.add(-1, 0, -1), blockpos.add(16, getWorld().getSeaLevel(), 16))) {
+                label44:
+
+                for (int i = 0; i < 16; ++i) {
+                    for (int j = 0; j < 16; ++j) {
+                        if (!this.checkLight(i, j)) {
+                            this.isLightPopulated = false;
+                            break label44;
+                        }
+                    }
+                }
+
+                if (this.isLightPopulated) {
+                    for (EnumFacing enumfacing : EnumFacing.Plane.HORIZONTAL) {
+                        int k = enumfacing.getAxisDirection() == EnumFacing.AxisDirection.POSITIVE ? 16 : 1;
+                        getWorld().getChunkFromBlockCoords(blockpos.offset(enumfacing, k))
+                            .checkLightSide(enumfacing.getOpposite());
+                    }
+
+                    this.setSkylightUpdated();
+                }
+            } else {
+                this.isLightPopulated = false;
+            }
+        }
+    }
+
+    private void setSkylightUpdated() {
+        Arrays.fill(this.updateSkylightColumns, true);
+
+        this.recheckGaps(false);
+    }
+
+    private void checkLightSide(EnumFacing facing) {
+        if (this.isTerrainPopulated) {
+            if (facing == EnumFacing.EAST) {
+                for (int i = 0; i < 16; ++i) {
+                    this.checkLight(15, i);
+                }
+            } else if (facing == EnumFacing.WEST) {
+                for (int j = 0; j < 16; ++j) {
+                    this.checkLight(0, j);
+                }
+            } else if (facing == EnumFacing.SOUTH) {
+                for (int k = 0; k < 16; ++k) {
+                    this.checkLight(k, 15);
+                }
+            } else if (facing == EnumFacing.NORTH) {
+                for (int l = 0; l < 16; ++l) {
+                    this.checkLight(l, 0);
+                }
+            }
+        }
+    }
+
+    private boolean checkLight(int x, int z) {
+        int i = this.getTopFilledSegment();
+        boolean flag = false;
+        boolean flag1 = false;
+        BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos(
+            (this.xPosition << 4) + x,
+            0,
+            (this.zPosition << 4) + z);
+
+        for (int j = i + 16 - 1; j > getWorld().getSeaLevel() || j > 0 && !flag1; --j) {
+            blockpos$mutableblockpos.setPos(blockpos$mutableblockpos.getX(), j, blockpos$mutableblockpos.getZ());
+            int k = this.getBlockLightOpacity(blockpos$mutableblockpos);
+
+            if (k == 255 && blockpos$mutableblockpos.getY() < getWorld().getSeaLevel()) {
+                flag1 = true;
+            }
+
+            if (!flag && k > 0) {
+                flag = true;
+            } else if (flag && k == 0 && !getWorld().checkLight(blockpos$mutableblockpos)) {
+                return false;
+            }
+        }
+
+        for (int l = blockpos$mutableblockpos.getY(); l > 0; --l) {
+            blockpos$mutableblockpos.setPos(blockpos$mutableblockpos.getX(), l, blockpos$mutableblockpos.getZ());
+
+            if (this.getBlockState(blockpos$mutableblockpos)
+                .getLightValue(getWorld(), blockpos$mutableblockpos) > 0) {
+                getWorld().checkLight(blockpos$mutableblockpos);
+            }
+        }
+
+        return true;
+    }
+
+    public boolean isLoaded() {
+        return super.isChunkLoaded;
+    }
+
+    @SideOnly(Side.CLIENT)
+    public void markLoaded(boolean loaded) {
+        super.isChunkLoaded = loaded;
+    }
+
+    public WrapperWorld getWorld() {
+        return (WrapperWorld) super.worldObj;
+    }
+
+    public int[] getHeightMap() {
+        return this.heightMap;
+    }
+
+    public void setHeightMap(int[] newHeightMap) {
+        if (this.heightMap.length != newHeightMap.length) {
+            LOGGER.warn(
+                "Could not set level chunk heightmap, array length is {} instead of {}",
+                newHeightMap.length,
+                this.heightMap.length);
+        } else {
+            System.arraycopy(newHeightMap, 0, this.heightMap, 0, this.heightMap.length);
+            this.heightMapMinimum = com.google.common.primitives.Ints.min(this.heightMap); // Forge: fix MC-117412
+        }
+    }
+
+    public Map<BlockPos, TileEntity> getTileEntityMap() {
+        return this.tileEntities;
+    }
+
+    public ClassInheritanceMultiMap<Entity>[] getEntityLists() {
+        return this.entityLists;
+    }
+
+    public boolean isTerrainPopulated() {
+        return this.isTerrainPopulated;
+    }
+
+    public void setTerrainPopulated(boolean terrainPopulated) {
+        this.isTerrainPopulated = terrainPopulated;
+    }
+
+    public boolean isLightPopulated() {
+        return this.isLightPopulated;
+    }
+
+    public void setLightPopulated(boolean lightPopulated) {
+        this.isLightPopulated = lightPopulated;
+    }
+
+    public void setModified(boolean modified) {
+        this.isModified = modified;
+    }
+
+    public void setHasEntities(boolean hasEntitiesIn) {
+        this.hasEntities = hasEntitiesIn;
+    }
+
+    public void setLastSaveTime(long saveTime) {
+        this.lastSaveTime = saveTime;
+    }
+
+    public int getLowestHeight() {
+        return this.heightMapMinimum;
+    }
+
+    public long getInhabitedTime() {
+        return this.inhabitedTime;
+    }
+
+    public void setInhabitedTime(long newInhabitedTime) {
+        this.inhabitedTime = newInhabitedTime;
+    }
+
+    public static enum EnumCreateEntityType {
+        IMMEDIATE,
+        QUEUED,
+        CHECK;
+    }
+
+    /* ======================================== FORGE START ===================================== */
+
+    /**
+     * Removes the tile entity at the specified position, only if it's
+     * marked as invalid.
+     */
+    public void removeInvalidTileEntity(BlockPos pos) {
+        if (isChunkLoaded) {
+            TileEntity entity = (TileEntity) tileEntities.get(pos);
+            if (entity != null && entity.isInvalid()) {
+                tileEntities.remove(pos);
+            }
+        }
+    }
+
+    private static ChunkPos populating = null; // keep track of cascading chunk generation during chunk population
+
+    private void logCascadingWorldGeneration() {
+        ModContainer activeModContainer = Loader.instance()
+            .activeModContainer();
+        String format = "{} loaded a new chunk {} in dimension {} ({}) while populating chunk {}, causing cascading worldgen lag.";
+
+        if (activeModContainer == null) { // vanilla minecraft has problems too (MC-114332), log it at a quieter level.
+            LOG.debug(
+                format,
+                "wrapped Minecraft",
+                this.getPos(),
+                getWorld().provider.getDimension(),
+                getWorld().provider.getDimensionType()
+                    .getName(),
+                populating);
+            LOG.debug(
+                "Consider setting 'fixVanillaCascading' to 'true' in the Forge config to fix many cases where this occurs in the base game.");
+        } else {
+            LOG.warn(
+                format,
+                activeModContainer.getName(),
+                this.getPos(),
+                getWorld().provider.getDimension(),
+                getWorld().provider.getDimensionType()
+                    .getName(),
+                populating);
+            LOG.warn("Please report this to the mod's issue tracker. This log can be disabled in the Forge config.");
+        }
+    }
+
+    private final CapabilityDispatcher capabilities;
+
+    @Nullable
+    public CapabilityDispatcher getCapabilities() {
+        return capabilities;
+    }
+
+    @Override
+    public boolean hasCapability(Capability<?> capability, @Nullable EnumFacing facing) {
+        return capabilities != null && capabilities.hasCapability(capability, facing);
+    }
+
+    @Override
+    @Nullable
+    public <T> T getCapability(Capability<T> capability, @Nullable EnumFacing facing) {
+        return capabilities == null ? null : capabilities.getCapability(capability, facing);
+    }
+}
