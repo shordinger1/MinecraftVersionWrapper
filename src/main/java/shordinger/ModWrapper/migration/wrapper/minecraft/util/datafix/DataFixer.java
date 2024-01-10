@@ -4,13 +4,13 @@ import java.util.List;
 import java.util.Map;
 
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.Util;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import shordinger.ModWrapper.migration.wrapper.minecraft.util.Util;
 
 public class DataFixer implements IDataFixer {
 

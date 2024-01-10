@@ -92,7 +92,7 @@ public class Bootstrap {
     }
 
     static void registerDispenserBehaviors() {
-        BlockDispenser.DISPENSE_BEHAVIOR_REGISTRY.putObject(Items.ARROW, new BehaviorProjectileDispense() {
+        BlockDispenser.DISPENSE_BEHAVIOR_REGISTRY.putObject(WrapperItems.ARROW, new BehaviorProjectileDispense() {
 
             /**
              * Return the projectile entity spawned by this dispense behavior.
@@ -107,7 +107,7 @@ public class Bootstrap {
                 return entitytippedarrow;
             }
         });
-        BlockDispenser.DISPENSE_BEHAVIOR_REGISTRY.putObject(Items.TIPPED_ARROW, new BehaviorProjectileDispense() {
+        BlockDispenser.DISPENSE_BEHAVIOR_REGISTRY.putObject(WrapperItems.TIPPED_ARROW, new BehaviorProjectileDispense() {
 
             /**
              * Return the projectile entity spawned by this dispense behavior.
@@ -123,7 +123,7 @@ public class Bootstrap {
                 return entitytippedarrow;
             }
         });
-        BlockDispenser.DISPENSE_BEHAVIOR_REGISTRY.putObject(Items.SPECTRAL_ARROW, new BehaviorProjectileDispense() {
+        BlockDispenser.DISPENSE_BEHAVIOR_REGISTRY.putObject(WrapperItems.SPECTRAL_ARROW, new BehaviorProjectileDispense() {
 
             /**
              * Return the projectile entity spawned by this dispense behavior.
@@ -138,7 +138,7 @@ public class Bootstrap {
                 return entityarrow;
             }
         });
-        BlockDispenser.DISPENSE_BEHAVIOR_REGISTRY.putObject(Items.EGG, new BehaviorProjectileDispense() {
+        BlockDispenser.DISPENSE_BEHAVIOR_REGISTRY.putObject(WrapperItems.EGG, new BehaviorProjectileDispense() {
 
             /**
              * Return the projectile entity spawned by this dispense behavior.
@@ -147,7 +147,7 @@ public class Bootstrap {
                 return new EntityEgg(worldIn, position.getX(), position.getY(), position.getZ());
             }
         });
-        BlockDispenser.DISPENSE_BEHAVIOR_REGISTRY.putObject(Items.SNOWBALL, new BehaviorProjectileDispense() {
+        BlockDispenser.DISPENSE_BEHAVIOR_REGISTRY.putObject(WrapperItems.SNOWBALL, new BehaviorProjectileDispense() {
 
             /**
              * Return the projectile entity spawned by this dispense behavior.
@@ -156,7 +156,7 @@ public class Bootstrap {
                 return new EntitySnowball(worldIn, position.getX(), position.getY(), position.getZ());
             }
         });
-        BlockDispenser.DISPENSE_BEHAVIOR_REGISTRY.putObject(Items.EXPERIENCE_BOTTLE, new BehaviorProjectileDispense() {
+        BlockDispenser.DISPENSE_BEHAVIOR_REGISTRY.putObject(WrapperItems.EXPERIENCE_BOTTLE, new BehaviorProjectileDispense() {
 
             /**
              * Return the projectile entity spawned by this dispense behavior.
@@ -173,7 +173,7 @@ public class Bootstrap {
                 return super.getProjectileVelocity() * 1.25F;
             }
         });
-        BlockDispenser.DISPENSE_BEHAVIOR_REGISTRY.putObject(Items.SPLASH_POTION, new IBehaviorDispenseItem() {
+        BlockDispenser.DISPENSE_BEHAVIOR_REGISTRY.putObject(WrapperItems.SPLASH_POTION, new IBehaviorDispenseItem() {
 
             /**
              * Dispenses the specified ItemStack from a dispenser.
@@ -203,7 +203,7 @@ public class Bootstrap {
                 }).dispense(source, stack);
             }
         });
-        BlockDispenser.DISPENSE_BEHAVIOR_REGISTRY.putObject(Items.LINGERING_POTION, new IBehaviorDispenseItem() {
+        BlockDispenser.DISPENSE_BEHAVIOR_REGISTRY.putObject(WrapperItems.LINGERING_POTION, new IBehaviorDispenseItem() {
 
             /**
              * Dispenses the specified ItemStack from a dispenser.
@@ -233,7 +233,7 @@ public class Bootstrap {
                 }).dispense(source, stack);
             }
         });
-        BlockDispenser.DISPENSE_BEHAVIOR_REGISTRY.putObject(Items.SPAWN_EGG, new BehaviorDefaultDispenseItem() {
+        BlockDispenser.DISPENSE_BEHAVIOR_REGISTRY.putObject(WrapperItems.SPAWN_EGG, new BehaviorDefaultDispenseItem() {
 
             /**
              * Dispense the specified stack, play the dispense sound and spawn particles.
@@ -257,7 +257,7 @@ public class Bootstrap {
                 return stack;
             }
         });
-        BlockDispenser.DISPENSE_BEHAVIOR_REGISTRY.putObject(Items.FIREWORKS, new BehaviorDefaultDispenseItem() {
+        BlockDispenser.DISPENSE_BEHAVIOR_REGISTRY.putObject(WrapperItems.FIREWORKS, new BehaviorDefaultDispenseItem() {
 
             /**
              * Dispense the specified stack, play the dispense sound and spawn particles.
@@ -289,7 +289,7 @@ public class Bootstrap {
                     .playEvent(1004, source.getBlockPos(), 0);
             }
         });
-        BlockDispenser.DISPENSE_BEHAVIOR_REGISTRY.putObject(Items.FIRE_CHARGE, new BehaviorDefaultDispenseItem() {
+        BlockDispenser.DISPENSE_BEHAVIOR_REGISTRY.putObject(WrapperItems.FIRE_CHARGE, new BehaviorDefaultDispenseItem() {
 
             /**
              * Dispense the specified stack, play the dispense sound and spawn particles.
@@ -320,17 +320,17 @@ public class Bootstrap {
             }
         });
         BlockDispenser.DISPENSE_BEHAVIOR_REGISTRY
-            .putObject(Items.BOAT, new Bootstrap.BehaviorDispenseBoat(EntityBoat.Type.OAK));
+            .putObject(WrapperItems.BOAT, new Bootstrap.BehaviorDispenseBoat(EntityBoat.Type.OAK));
         BlockDispenser.DISPENSE_BEHAVIOR_REGISTRY
-            .putObject(Items.SPRUCE_BOAT, new Bootstrap.BehaviorDispenseBoat(EntityBoat.Type.SPRUCE));
+            .putObject(WrapperItems.SPRUCE_BOAT, new Bootstrap.BehaviorDispenseBoat(EntityBoat.Type.SPRUCE));
         BlockDispenser.DISPENSE_BEHAVIOR_REGISTRY
-            .putObject(Items.BIRCH_BOAT, new Bootstrap.BehaviorDispenseBoat(EntityBoat.Type.BIRCH));
+            .putObject(WrapperItems.BIRCH_BOAT, new Bootstrap.BehaviorDispenseBoat(EntityBoat.Type.BIRCH));
         BlockDispenser.DISPENSE_BEHAVIOR_REGISTRY
-            .putObject(Items.JUNGLE_BOAT, new Bootstrap.BehaviorDispenseBoat(EntityBoat.Type.JUNGLE));
+            .putObject(WrapperItems.JUNGLE_BOAT, new Bootstrap.BehaviorDispenseBoat(EntityBoat.Type.JUNGLE));
         BlockDispenser.DISPENSE_BEHAVIOR_REGISTRY
-            .putObject(Items.DARK_OAK_BOAT, new Bootstrap.BehaviorDispenseBoat(EntityBoat.Type.DARK_OAK));
+            .putObject(WrapperItems.DARK_OAK_BOAT, new Bootstrap.BehaviorDispenseBoat(EntityBoat.Type.DARK_OAK));
         BlockDispenser.DISPENSE_BEHAVIOR_REGISTRY
-            .putObject(Items.ACACIA_BOAT, new Bootstrap.BehaviorDispenseBoat(EntityBoat.Type.ACACIA));
+            .putObject(WrapperItems.ACACIA_BOAT, new Bootstrap.BehaviorDispenseBoat(EntityBoat.Type.ACACIA));
         IBehaviorDispenseItem ibehaviordispenseitem = new BehaviorDefaultDispenseItem() {
 
             private final BehaviorDefaultDispenseItem dispenseBehavior = new BehaviorDefaultDispenseItem();
@@ -345,17 +345,17 @@ public class Bootstrap {
                         (EnumFacing) source.getBlockState()
                             .getValue(BlockDispenser.FACING));
                 return itembucket.tryPlaceContainedLiquid((EntityPlayer) null, source.getWorld(), blockpos)
-                    ? new ItemStack(Items.BUCKET)
+                    ? new ItemStack(WrapperItems.BUCKET)
                     : this.dispenseBehavior.dispense(source, stack);
             }
         };
-        BlockDispenser.DISPENSE_BEHAVIOR_REGISTRY.putObject(Items.LAVA_BUCKET, ibehaviordispenseitem);
-        BlockDispenser.DISPENSE_BEHAVIOR_REGISTRY.putObject(Items.WATER_BUCKET, ibehaviordispenseitem);
+        BlockDispenser.DISPENSE_BEHAVIOR_REGISTRY.putObject(WrapperItems.LAVA_BUCKET, ibehaviordispenseitem);
+        BlockDispenser.DISPENSE_BEHAVIOR_REGISTRY.putObject(WrapperItems.WATER_BUCKET, ibehaviordispenseitem);
         BlockDispenser.DISPENSE_BEHAVIOR_REGISTRY
-            .putObject(Items.MILK_BUCKET, net.minecraftforge.fluids.DispenseFluidContainer.getInstance());
+            .putObject(WrapperItems.MILK_BUCKET, net.minecraftforge.fluids.DispenseFluidContainer.getInstance());
         BlockDispenser.DISPENSE_BEHAVIOR_REGISTRY
-            .putObject(Items.BUCKET, net.minecraftforge.fluids.DispenseFluidContainer.getInstance());
-        if (false) BlockDispenser.DISPENSE_BEHAVIOR_REGISTRY.putObject(Items.BUCKET, new BehaviorDefaultDispenseItem() {
+            .putObject(WrapperItems.BUCKET, net.minecraftforge.fluids.DispenseFluidContainer.getInstance());
+        if (false) BlockDispenser.DISPENSE_BEHAVIOR_REGISTRY.putObject(WrapperItems.BUCKET, new BehaviorDefaultDispenseItem() {
 
             private final BehaviorDefaultDispenseItem dispenseBehavior = new BehaviorDefaultDispenseItem();
 
@@ -375,14 +375,14 @@ public class Bootstrap {
 
                 if (Material.WATER.equals(material) && block instanceof BlockLiquid
                     && ((Integer) iblockstate.getValue(BlockLiquid.LEVEL)).intValue() == 0) {
-                    item = Items.WATER_BUCKET;
+                    item = WrapperItems.WATER_BUCKET;
                 } else {
                     if (!Material.LAVA.equals(material) || !(block instanceof BlockLiquid)
                         || ((Integer) iblockstate.getValue(BlockLiquid.LEVEL)).intValue() != 0) {
                         return super.dispenseStack(source, stack);
                     }
 
-                    item = Items.LAVA_BUCKET;
+                    item = WrapperItems.LAVA_BUCKET;
                 }
 
                 world.setBlockToAir(blockpos);
@@ -400,7 +400,7 @@ public class Bootstrap {
             }
         });
         BlockDispenser.DISPENSE_BEHAVIOR_REGISTRY
-            .putObject(Items.FLINT_AND_STEEL, new Bootstrap.BehaviorDispenseOptional() {
+            .putObject(WrapperItems.FLINT_AND_STEEL, new Bootstrap.BehaviorDispenseOptional() {
 
                 /**
                  * Dispense the specified stack, play the dispense sound and spawn particles.
@@ -434,7 +434,7 @@ public class Bootstrap {
                     return stack;
                 }
             });
-        BlockDispenser.DISPENSE_BEHAVIOR_REGISTRY.putObject(Items.DYE, new Bootstrap.BehaviorDispenseOptional() {
+        BlockDispenser.DISPENSE_BEHAVIOR_REGISTRY.putObject(WrapperItems.DYE, new Bootstrap.BehaviorDispenseOptional() {
 
             /**
              * Dispense the specified stack, play the dispense sound and spawn particles.
@@ -495,7 +495,7 @@ public class Bootstrap {
                     return stack;
                 }
             });
-        BlockDispenser.DISPENSE_BEHAVIOR_REGISTRY.putObject(Items.SKULL, new Bootstrap.BehaviorDispenseOptional() {
+        BlockDispenser.DISPENSE_BEHAVIOR_REGISTRY.putObject(WrapperItems.SKULL, new Bootstrap.BehaviorDispenseOptional() {
 
             /**
              * Dispense the specified stack, play the dispense sound and spawn particles.

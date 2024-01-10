@@ -115,11 +115,11 @@ public class WrapperWorldType extends WorldType {
         return super.showWorldInfoNotice();
     }
 
-    public net.minecraft.world.biome.BiomeProvider getBiomeProvider(WrapperWorld wrapperWorld) {
+    public net.minecraft.world.biome.BiomeProvider getBiomeProvider(World world) {
         if (this == FLAT) {
             net.minecraft.world.gen.FlatGeneratorInfo flatgeneratorinfo = net.minecraft.world.gen.FlatGeneratorInfo
                 .createFlatGeneratorFromString(
-                    wrapperWorld.getWorldInfo()
+                    world.getWorldInfo()
                         .getGeneratorOptions());
             return new net.minecraft.world.biome.BiomeProviderSingle(
                 net.minecraft.world.biome.Biome
@@ -127,38 +127,38 @@ public class WrapperWorldType extends WorldType {
         } else if (this == DEBUG_ALL_BLOCK_STATES) {
             return new net.minecraft.world.biome.BiomeProviderSingle(net.minecraft.init.Biomes.PLAINS);
         } else {
-            return new net.minecraft.world.biome.BiomeProvider(wrapperWorld.getWorldInfo());
+            return new net.minecraft.world.biome.BiomeProvider(world.getWorldInfo());
         }
     }
 
-    public net.minecraft.world.gen.IChunkGenerator getChunkGenerator(WrapperWorld wrapperWorld,
-        String generatorOptions) {
+    public net.minecraft.world.gen.IChunkGenerator getChunkGenerator(World world,
+                                                                     String generatorOptions) {
         if (this == FLAT) return new net.minecraft.world.gen.ChunkGeneratorFlat(
-            wrapperWorld,
-            wrapperWorld.getSeed(),
-            wrapperWorld.getWorldInfo()
+                world,
+            world.getSeed(),
+            world.getWorldInfo()
                 .isMapFeaturesEnabled(),
             generatorOptions);
-        if (this == DEBUG_ALL_BLOCK_STATES) return new net.minecraft.world.gen.ChunkGeneratorDebug(wrapperWorld);
+        if (this == DEBUG_ALL_BLOCK_STATES) return new net.minecraft.world.gen.ChunkGeneratorDebug(world);
         if (this == CUSTOMIZED) return new net.minecraft.world.gen.ChunkGeneratorOverworld(
-            wrapperWorld,
-            wrapperWorld.getSeed(),
-            wrapperWorld.getWorldInfo()
+                world,
+            world.getSeed(),
+            world.getWorldInfo()
                 .isMapFeaturesEnabled(),
             generatorOptions);
         return new net.minecraft.world.gen.ChunkGeneratorOverworld(
-            wrapperWorld,
-            wrapperWorld.getSeed(),
-            wrapperWorld.getWorldInfo()
+                world,
+            world.getSeed(),
+            world.getWorldInfo()
                 .isMapFeaturesEnabled(),
             generatorOptions);
     }
 
-    public int getMinimumSpawnHeight(WrapperWorld wrapperWorld) {
-        return this == FLAT ? 4 : wrapperWorld.getSeaLevel() + 1;
+    public int getMinimumSpawnHeight(World world) {
+        return this == FLAT ? 4 : world.getSeaLevel() + 1;
     }
 
-    public double getHorizon(WrapperWorld wrapperWorld) {
+    public double getHorizon(World world) {
         return this == FLAT ? 0.0D : 63.0D;
     }
 
@@ -166,7 +166,7 @@ public class WrapperWorldType extends WorldType {
         return super.voidFadeMagnitude();
     }
 
-    public boolean handleSlimeSpawnReduction(java.util.Random random, WrapperWorld wrapperWorld) {
+    public boolean handleSlimeSpawnReduction(java.util.Random random, World world) {
         return this == FLAT && random.nextInt(4) != 1;
     }
 
@@ -206,7 +206,7 @@ public class WrapperWorldType extends WorldType {
      *
      * @return Fuzz for entity initial spawn in blocks.
      */
-    public int getSpawnFuzz(WrapperWorldServer world, net.minecraft.server.MinecraftServer server) {
+    public int getSpawnFuzz(WorldServer world, net.minecraft.server.MinecraftServer server) {
         return Math.max(0, server.getSpawnRadius(world));
     }
 

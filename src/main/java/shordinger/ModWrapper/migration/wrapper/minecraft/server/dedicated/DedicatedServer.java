@@ -31,7 +31,7 @@ import net.minecraft.server.management.PlayerProfileCache;
 import net.minecraft.server.management.PreYggdrasilConverter;
 import net.minecraft.tileentity.TileEntitySkull;
 import net.minecraft.util.CryptManager;
-import net.minecraft.util.NonNullList;
+import shordinger.ModWrapper.migration.wrapper.minecraft.util.NonNullList;
 import net.minecraft.util.datafix.DataFixer;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.GameType;

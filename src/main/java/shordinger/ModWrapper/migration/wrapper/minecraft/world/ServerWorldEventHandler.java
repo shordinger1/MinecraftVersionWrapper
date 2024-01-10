@@ -20,9 +20,9 @@ public class ServerWorldEventHandler implements IWorldEventListener {
     /** Reference to the MinecraftServer object. */
     private final MinecraftServer mcServer;
     /** The WorldServer object. */
-    private final WrapperWorldServer world;
+    private final WorldServer world;
 
-    public ServerWorldEventHandler(MinecraftServer mcServerIn, WrapperWorldServer worldServerIn) {
+    public ServerWorldEventHandler(MinecraftServer mcServerIn, WorldServer worldServerIn) {
         this.mcServer = mcServerIn;
         this.world = worldServerIn;
     }
@@ -79,8 +79,8 @@ public class ServerWorldEventHandler implements IWorldEventListener {
      */
     public void markBlockRangeForRenderUpdate(int x1, int y1, int z1, int x2, int y2, int z2) {}
 
-    public void notifyBlockUpdate(WrapperWorld wrapperWorldIn, BlockPos pos, IWrapperBlockState oldState,
-        IWrapperBlockState newState, int flags) {
+    public void notifyBlockUpdate(World worldIn, BlockPos pos, IWrapperBlockState oldState,
+                                  IWrapperBlockState newState, int flags) {
         this.world.getPlayerChunkMap()
             .markBlockForUpdate(pos);
     }

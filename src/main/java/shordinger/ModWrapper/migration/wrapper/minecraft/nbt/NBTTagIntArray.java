@@ -35,7 +35,7 @@ public class NBTTagIntArray extends NBTBase {
     /**
      * Write the actual data contents of the tag, implemented in NBT extension classes
      */
-    void write(DataOutput output) throws IOException {
+    public void write(DataOutput output) throws IOException {
         output.writeInt(this.intArray.length);
 
         for (int i : this.intArray) {
@@ -43,7 +43,7 @@ public class NBTTagIntArray extends NBTBase {
         }
     }
 
-    void read(DataInput input, int depth, NBTSizeTracker sizeTracker) throws IOException {
+    public void read(DataInput input, int depth, NBTSizeTracker sizeTracker) throws IOException {
         sizeTracker.read(192L);
         int i = input.readInt();
         sizeTracker.read((long) (32 * i));

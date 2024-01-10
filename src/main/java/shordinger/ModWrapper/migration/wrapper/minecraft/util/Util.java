@@ -12,28 +12,7 @@ import org.apache.logging.log4j.Logger;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
-public class Util {
-
-    @SideOnly(Side.CLIENT)
-    public static Util.EnumOS getOSType() {
-        String s = System.getProperty("os.name")
-            .toLowerCase(Locale.ROOT);
-
-        if (s.contains("win")) {
-            return Util.EnumOS.WINDOWS;
-        } else if (s.contains("mac")) {
-            return Util.EnumOS.OSX;
-        } else if (s.contains("solaris")) {
-            return Util.EnumOS.SOLARIS;
-        } else if (s.contains("sunos")) {
-            return Util.EnumOS.SOLARIS;
-        } else if (s.contains("linux")) {
-            return Util.EnumOS.LINUX;
-        } else {
-            return s.contains("unix") ? Util.EnumOS.LINUX : Util.EnumOS.UNKNOWN;
-        }
-    }
-
+public class Util extends net.minecraft.util.Util {
     /**
      * Run a task and return the result, catching any execution exceptions and logging them to the specified logger
      */
@@ -55,12 +34,4 @@ public class Util {
         return list.get(list.size() - 1);
     }
 
-    @SideOnly(Side.CLIENT)
-    public static enum EnumOS {
-        LINUX,
-        SOLARIS,
-        WINDOWS,
-        OSX,
-        UNKNOWN;
-    }
 }

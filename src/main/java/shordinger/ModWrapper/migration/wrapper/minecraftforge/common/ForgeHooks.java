@@ -88,7 +88,7 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.IntIdentityHashBiMap;
 import net.minecraft.util.JsonUtils;
-import net.minecraft.util.NonNullList;
+import shordinger.ModWrapper.migration.wrapper.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.WeightedRandom;
 import net.minecraft.util.text.ITextComponent;

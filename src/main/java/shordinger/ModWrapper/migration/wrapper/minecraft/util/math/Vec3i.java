@@ -2,18 +2,25 @@ package shordinger.ModWrapper.migration.wrapper.minecraft.util.math;
 
 import javax.annotation.concurrent.Immutable;
 
-import com.google.common.base.MoreObjects;
 
 @Immutable
 public class Vec3i implements Comparable<Vec3i> {
 
-    /** An immutable vector with zero as all coordinates. */
+    /**
+     * An immutable vector with zero as all coordinates.
+     */
     public static final Vec3i NULL_VECTOR = new Vec3i(0, 0, 0);
-    /** X coordinate */
+    /**
+     * X coordinate
+     */
     private final int x;
-    /** Y coordinate */
+    /**
+     * Y coordinate
+     */
     private final int y;
-    /** Z coordinate */
+    /**
+     * Z coordinate
+     */
     private final int z;
 
     public Vec3i(int xIn, int yIn, int zIn) {
@@ -123,10 +130,6 @@ public class Vec3i implements Comparable<Vec3i> {
     }
 
     public String toString() {
-        return MoreObjects.toStringHelper(this)
-            .add("x", this.getX())
-            .add("y", this.getY())
-            .add("z", this.getZ())
-            .toString();
+        return "VEC3I+X" + x + "Y" + y + "Z" + z;
     }
 }

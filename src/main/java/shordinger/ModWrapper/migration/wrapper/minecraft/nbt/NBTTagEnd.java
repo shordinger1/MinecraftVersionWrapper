@@ -6,14 +6,14 @@ import java.io.IOException;
 
 public class NBTTagEnd extends NBTBase {
 
-    void read(DataInput input, int depth, NBTSizeTracker sizeTracker) throws IOException {
+    public void read(DataInput input, int depth, NBTSizeTracker sizeTracker) throws IOException {
         sizeTracker.read(64L);
     }
 
     /**
      * Write the actual data contents of the tag, implemented in NBT extension classes
      */
-    void write(DataOutput output) throws IOException {}
+    public void write(DataOutput output) throws IOException {}
 
     /**
      * Gets the type byte for the tag.

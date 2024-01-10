@@ -22,7 +22,7 @@ import javax.annotation.Nonnegative;
 
 import net.minecraft.entity.projectile.EntityFishHook;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.NonNullList;
+import shordinger.ModWrapper.migration.wrapper.minecraft.util.NonNullList;
 import net.minecraftforge.fml.common.eventhandler.Cancelable;
 
 import com.google.common.base.Preconditions;
@@ -50,7 +50,7 @@ public class ItemFishedEvent extends PlayerEvent {
 
     /**
      * Get the damage the rod will take.
-     * 
+     *
      * @return The damage the rod will take
      */
     public int getRodDamage() {
@@ -60,7 +60,7 @@ public class ItemFishedEvent extends PlayerEvent {
     /**
      * Specifies the amount of damage that the fishing rod should take.
      * This is not added to the pre-existing damage to be taken.
-     * 
+     *
      * @param rodDamage The damage the rod will take. Must be nonnegative
      */
     public void damageRodBy(@Nonnegative int rodDamage) {

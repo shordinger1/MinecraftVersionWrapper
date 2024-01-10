@@ -1068,7 +1068,7 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable {
     /**
      * Gets the current global Minecart Collision handler if none
      * is registered, returns null
-     * 
+     *
      * @return The collision handler or null
      */
     @Nullable
@@ -1079,7 +1079,7 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable {
     /**
      * Sets the global Minecart Collision handler, overwrites any
      * that is currently set.
-     * 
+     *
      * @param handler The new handler
      */
     public static void setCollisionHandler(net.minecraftforge.common.IMinecartCollisionHandler handler) {
@@ -1090,7 +1090,7 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable {
      * This function returns an ItemStack that represents this cart.
      * This should be an ItemStack that can be used by the player to place the cart,
      * but is not necessary the item the cart drops when destroyed.
-     * 
+     *
      * @return An ItemStack that can be used to place the cart.
      */
     public ItemStack getCartItem() {
@@ -1111,7 +1111,7 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable {
     /**
      * Returns true if this cart can currently use rails.
      * This function is mainly used to gracefully detach a minecart from a rail.
-     * 
+     *
      * @return True if the minecart can use rails.
      */
     public boolean canUseRail() {
@@ -1121,7 +1121,7 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable {
     /**
      * Set whether the minecart can use rails.
      * This function is mainly used to gracefully detach a minecart from a rail.
-     * 
+     *
      * @param use Whether the minecart can currently use rails.
      */
     public void setCanUseRail(boolean use) {
@@ -1130,7 +1130,7 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable {
 
     /**
      * Return false if this cart should not call onMinecartPass() and should ignore Powered Rails.
-     * 
+     *
      * @return True if this cart should call onMinecartPass().
      */
     public boolean shouldDoRailFunctions() {
@@ -1139,7 +1139,7 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable {
 
     /**
      * Returns true if this cart is self propelled.
-     * 
+     *
      * @return True if powered.
      */
     public boolean isPoweredCart() {
@@ -1148,7 +1148,7 @@ public abstract class EntityMinecart extends Entity implements IWorldNameable {
 
     /**
      * Returns true if this cart can be ridden by an Entity.
-     * 
+     *
      * @return True if this cart can be ridden.
      */
     public boolean canBeRidden() {

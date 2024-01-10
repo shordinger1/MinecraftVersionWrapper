@@ -29,12 +29,12 @@ public class CommandResultStats {
         this.objectives = STRING_RESULT_TYPES;
     }
 
-    public void setCommandStatForSender(MinecraftServer server, final ICommandSender sender,
+    public void setCommandStatForSender(MinecraftServer server, final IWrapperCommandSender sender,
         CommandResultStats.Type typeIn, int p_184932_4_) {
         String s = this.entitiesID[typeIn.getTypeID()];
 
         if (s != null) {
-            ICommandSender icommandsender = new ICommandSender() {
+            IWrapperCommandSender icommandsender = new IWrapperCommandSender() {
 
                 /**
                  * Get the name of this object. For players this returns their username

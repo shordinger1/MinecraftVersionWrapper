@@ -2,39 +2,32 @@ package shordinger.ModWrapper.migration.wrapper.minecraft.tileentity;
 
 import javax.annotation.Nullable;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockJukebox;
-import net.minecraft.block.state.IWrapperBlockState;
-import net.minecraft.crash.CrashReportCategory;
-import net.minecraft.crash.ICrashReportDetail;
-import net.minecraft.init.Blocks;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.network.play.server.SPacketUpdateTileEntity;
-import net.minecraft.util.Mirror;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.Rotation;
-import net.minecraft.util.registry.RegistryNamespaced;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.world.World;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import shordinger.ModWrapper.migration.wrapper.minecraft.block.Block;
+import shordinger.ModWrapper.migration.wrapper.minecraft.nbt.NBTTagCompound;
+import shordinger.ModWrapper.migration.wrapper.minecraft.util.ResourceLocation;
 import shordinger.ModWrapper.migration.wrapper.minecraft.util.math.BlockPos;
+import shordinger.ModWrapper.migration.wrapper.minecraft.world.World;
 
-public abstract class TileEntity
-    implements net.minecraftforge.common.capabilities.ICapabilitySerializable<NBTTagCompound> {
+public abstract class TileEntity extends net.minecraft.tileentity.TileEntity {
 
     private static final Logger LOGGER = LogManager.getLogger();
     private static final RegistryNamespaced<ResourceLocation, Class<? extends TileEntity>> REGISTRY = new RegistryNamespaced<ResourceLocation, Class<? extends TileEntity>>();
-    /** the instance of the world the tile entity is in. */
+    /**
+     * the instance of the world the tile entity is in.
+     */
     protected World world;
     protected BlockPos pos = BlockPos.ORIGIN;
     protected boolean tileEntityInvalid;
     private int blockMetadata = -1;
-    /** the Block type that this TileEntity is contained within */
+    /**
+     * the Block type that this TileEntity is contained within
+     */
     protected Block blockType;
 
     public static void register(String id, Class<? extends TileEntity> clazz) {
@@ -135,7 +128,8 @@ public abstract class TileEntity
         return tileentity;
     }
 
-    protected void setWorldCreate(World worldIn) {}
+    protected void setWorldCreate(World worldIn) {
+    }
 
     public int getBlockMetadata() {
         if (this.blockMetadata == -1) {
@@ -249,7 +243,7 @@ public abstract class TileEntity
             public String call() throws Exception {
                 return TileEntity.REGISTRY.getNameForObject(TileEntity.this.getClass()) + " // "
                     + TileEntity.this.getClass()
-                        .getCanonicalName();
+                    .getCanonicalName();
             }
         });
 
@@ -313,11 +307,14 @@ public abstract class TileEntity
         return null;
     }
 
-    public void rotate(Rotation rotationIn) {}
+    public void rotate(Rotation rotationIn) {
+    }
 
-    public void mirror(Mirror mirrorIn) {}
+    public void mirror(Mirror mirrorIn) {
+    }
 
     // -- BEGIN FORGE PATCHES --
+
     /**
      * Called when you receive a TileEntityData packet for the location this
      * TileEntity is currently in. On the client, the NetworkManager will always
@@ -328,7 +325,8 @@ public abstract class TileEntity
      * @param pkt The data packet
      */
     public void onDataPacket(net.minecraft.network.NetworkManager net,
-        net.minecraft.network.play.server.SPacketUpdateTileEntity pkt) {}
+                             net.minecraft.network.play.server.SPacketUpdateTileEntity pkt) {
+    }
 
     /**
      * Called when the chunk's TE update tag, gotten from {@link #getUpdateTag()}, is received on the client.
@@ -344,7 +342,8 @@ public abstract class TileEntity
     /**
      * Called when the chunk this TileEntity is on is Unloaded.
      */
-    public void onChunkUnload() {}
+    public void onChunkUnload() {
+    }
 
     private boolean isVanilla = getClass().getName()
         .startsWith("net.minecraft.");
@@ -424,7 +423,7 @@ public abstract class TileEntity
     /**
      * Checks if this tile entity knows how to render its 'breaking' overlay effect.
      * If this returns true, The TileEntitySpecialRenderer will be called again with break progress set.
-     * 
+     *
      * @return True to re-render tile with breaking effect.
      */
     public boolean canRenderBreaking() {
@@ -452,7 +451,7 @@ public abstract class TileEntity
     /**
      * Determines if the player can overwrite the NBT data of this tile entity while they place it using a ItemStack.
      * Added as a fix for MC-75630 - Exploit with signs and command blocks
-     * 
+     *
      * @return True to prevent NBT copy, false to allow.
      */
     public boolean restrictNBTCopy() {
@@ -486,14 +485,14 @@ public abstract class TileEntity
 
     @Override
     public boolean hasCapability(net.minecraftforge.common.capabilities.Capability<?> capability,
-        @Nullable net.minecraft.util.EnumFacing facing) {
+                                 @Nullable net.minecraft.util.EnumFacing facing) {
         return capabilities == null ? false : capabilities.hasCapability(capability, facing);
     }
 
     @Override
     @Nullable
     public <T> T getCapability(net.minecraftforge.common.capabilities.Capability<T> capability,
-        @Nullable net.minecraft.util.EnumFacing facing) {
+                               @Nullable net.minecraft.util.EnumFacing facing) {
         return capabilities == null ? null : capabilities.getCapability(capability, facing);
     }
 

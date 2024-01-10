@@ -2,60 +2,60 @@ package shordinger.ModWrapper.migration.wrapper.minecraft.init;
 
 import javax.annotation.Nullable;
 
-import net.minecraft.potion.Potion;
 import net.minecraft.util.ResourceLocation;
+import shordinger.ModWrapper.migration.wrapper.minecraft.potion.WrapperPotion;
 
 public class MobEffects {
 
-    public static final Potion SPEED;
-    public static final Potion SLOWNESS;
-    public static final Potion HASTE;
-    public static final Potion MINING_FATIGUE;
-    public static final Potion STRENGTH;
-    public static final Potion INSTANT_HEALTH;
-    public static final Potion INSTANT_DAMAGE;
-    public static final Potion JUMP_BOOST;
-    public static final Potion NAUSEA;
+    public static final WrapperPotion SPEED;
+    public static final WrapperPotion SLOWNESS;
+    public static final WrapperPotion HASTE;
+    public static final WrapperPotion MINING_FATIGUE;
+    public static final WrapperPotion STRENGTH;
+    public static final WrapperPotion INSTANT_HEALTH;
+    public static final WrapperPotion INSTANT_DAMAGE;
+    public static final WrapperPotion JUMP_BOOST;
+    public static final WrapperPotion NAUSEA;
     /** None */
-    public static final Potion REGENERATION;
-    public static final Potion RESISTANCE;
+    public static final WrapperPotion REGENERATION;
+    public static final WrapperPotion RESISTANCE;
     /** The fire resistance Potion object. */
-    public static final Potion FIRE_RESISTANCE;
+    public static final WrapperPotion FIRE_RESISTANCE;
     /** The water breathing Potion object. */
-    public static final Potion WATER_BREATHING;
+    public static final WrapperPotion WATER_BREATHING;
     /** The invisibility Potion object. */
-    public static final Potion INVISIBILITY;
+    public static final WrapperPotion INVISIBILITY;
     /** The blindness Potion object. */
-    public static final Potion BLINDNESS;
+    public static final WrapperPotion BLINDNESS;
     /** The night vision Potion object. */
-    public static final Potion NIGHT_VISION;
+    public static final WrapperPotion NIGHT_VISION;
     /** The hunger Potion object. */
-    public static final Potion HUNGER;
+    public static final WrapperPotion HUNGER;
     /** The weakness Potion object. */
-    public static final Potion WEAKNESS;
+    public static final WrapperPotion WEAKNESS;
     /** The poison Potion object. */
-    public static final Potion POISON;
+    public static final WrapperPotion POISON;
     /** The wither Potion object. */
-    public static final Potion WITHER;
+    public static final WrapperPotion WITHER;
     /** The health boost Potion object. */
-    public static final Potion HEALTH_BOOST;
+    public static final WrapperPotion HEALTH_BOOST;
     /** The absorption Potion object. */
-    public static final Potion ABSORPTION;
+    public static final WrapperPotion ABSORPTION;
     /** The saturation Potion object. */
-    public static final Potion SATURATION;
-    public static final Potion GLOWING;
-    public static final Potion LEVITATION;
-    public static final Potion LUCK;
-    public static final Potion UNLUCK;
+    public static final WrapperPotion SATURATION;
+    public static final WrapperPotion GLOWING;
+    public static final WrapperPotion LEVITATION;
+    public static final WrapperPotion LUCK;
+    public static final WrapperPotion UNLUCK;
 
     @Nullable
-    private static Potion getRegisteredMobEffect(String id) {
-        Potion potion = Potion.REGISTRY.getObject(new ResourceLocation(id));
+    private static WrapperPotion getRegisteredMobEffect(String id) {
+        WrapperPotion wrapperPotion = WrapperPotion.REGISTRY.getObject(new ResourceLocation(id));
 
-        if (potion == null) {
+        if (wrapperPotion == null) {
             throw new IllegalStateException("Invalid MobEffect requested: " + id);
         } else {
-            return potion;
+            return wrapperPotion;
         }
     }
 

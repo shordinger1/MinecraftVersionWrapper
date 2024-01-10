@@ -1,7 +1,7 @@
 package shordinger.ModWrapper.migration.wrapper.minecraft.inventory;
 
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.NonNullList;
+import shordinger.ModWrapper.migration.wrapper.minecraft.util.NonNullList;
 
 public interface IContainerListener {
 

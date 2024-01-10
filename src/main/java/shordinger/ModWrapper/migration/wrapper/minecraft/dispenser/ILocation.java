@@ -1,6 +1,6 @@
 package shordinger.ModWrapper.migration.wrapper.minecraft.dispenser;
 
-import net.minecraft.world.World;
+import shordinger.ModWrapper.migration.wrapper.minecraft.world.World;
 
 public interface ILocation extends IPosition {
 

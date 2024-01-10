@@ -8,7 +8,7 @@ import net.minecraft.world.IBlockAccess;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import shordinger.ModWrapper.migration.wrapper.minecraft.block.state.IWrapperBlockState;
+import shordinger.ModWrapper.migration.wrapper.minecraft.block.state.IBlockState;
 import shordinger.ModWrapper.migration.wrapper.minecraft.util.math.BlockPos;
 import shordinger.ModWrapper.migration.wrapper.minecraft.world.biome.Biome;
 
@@ -20,7 +20,7 @@ public interface IWrapperBlockAccess extends IBlockAccess {
     @SideOnly(Side.CLIENT)
     int getCombinedLight(BlockPos pos, int lightValue);
 
-    IWrapperBlockState getBlockState(BlockPos pos);
+    IBlockState getBlockState(BlockPos pos);
 
     /**
      * Checks to see if an air block exists at the provided location. Note that this only checks to see if the blocks
@@ -37,7 +37,7 @@ public interface IWrapperBlockAccess extends IBlockAccess {
     WrapperWorldType getWorldType();
 
     /**
-     * FORGE: isSideSolid, pulled up from {@link WrapperWorld}
+     * FORGE: isSideSolid, pulled up from {@link World}
      *
      * @param pos      Position
      * @param side     Side

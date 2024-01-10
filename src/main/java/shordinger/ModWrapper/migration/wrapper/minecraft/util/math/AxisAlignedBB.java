@@ -9,38 +9,14 @@ import com.google.common.annotations.VisibleForTesting;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
-public class AxisAlignedBB {
-
-    /** The minimum X coordinate of this bounding box. Guaranteed to always be less than or equal to {@link #maxX}. */
-    public final double minX;
-    /** The minimum Y coordinate of this bounding box. Guaranteed to always be less than or equal to {@link #maxY}. */
-    public final double minY;
-    /** The minimum Y coordinate of this bounding box. Guaranteed to always be less than or equal to {@link #maxZ}. */
-    public final double minZ;
-    /**
-     * The maximum X coordinate of this bounding box. Guaranteed to always be greater than or equal to {@link #minX}.
-     */
-    public final double maxX;
-    /**
-     * The maximum Y coordinate of this bounding box. Guaranteed to always be greater than or equal to {@link #minY}.
-     */
-    public final double maxY;
-    /**
-     * The maximum Z coordinate of this bounding box. Guaranteed to always be greater than or equal to {@link #minZ}.
-     */
-    public final double maxZ;
+public class AxisAlignedBB extends net.minecraft.util.AxisAlignedBB {
 
     public AxisAlignedBB(double x1, double y1, double z1, double x2, double y2, double z2) {
-        this.minX = Math.min(x1, x2);
-        this.minY = Math.min(y1, y2);
-        this.minZ = Math.min(z1, z2);
-        this.maxX = Math.max(x1, x2);
-        this.maxY = Math.max(y1, y2);
-        this.maxZ = Math.max(z1, z2);
+        super(x1, y1, z1, x2, y2, z2);
     }
 
     public AxisAlignedBB(BlockPos pos) {
-        this(
+        super(
             (double) pos.getX(),
             (double) pos.getY(),
             (double) pos.getZ(),
@@ -50,7 +26,7 @@ public class AxisAlignedBB {
     }
 
     public AxisAlignedBB(BlockPos pos1, BlockPos pos2) {
-        this(
+        super(
             (double) pos1.getX(),
             (double) pos1.getY(),
             (double) pos1.getZ(),
@@ -75,10 +51,9 @@ public class AxisAlignedBB {
     public boolean equals(Object p_equals_1_) {
         if (this == p_equals_1_) {
             return true;
-        } else if (!(p_equals_1_ instanceof AxisAlignedBB)) {
+        } else if (!(p_equals_1_ instanceof AxisAlignedBB axisalignedbb)) {
             return false;
         } else {
-            AxisAlignedBB axisalignedbb = (AxisAlignedBB) p_equals_1_;
 
             if (Double.compare(axisalignedbb.minX, this.minX) != 0) {
                 return false;
@@ -127,70 +102,70 @@ public class AxisAlignedBB {
      * </tr>
      * <tr>
      * <td>
-     * 
+     *
      * <pre>
      * <code>new AxisAlignedBB(0, 0, 0, 4, 4, 4).contract(2, 2, 2)</code>
      * </pre>
-     * 
+     *
      * </td>
      * <td>
-     * 
+     *
      * <pre>
      * <samp>box[0.0,
      * 0.0, 0.0 -> 2.0, 2.0, 2.0]</samp>
      * </pre>
-     * 
+     *
      * </td>
      * </tr>
      * <tr>
      * <td>
-     * 
+     *
      * <pre>
      * <code>new AxisAlignedBB(0, 0, 0, 4, 4, 4).contract(-2, -2, -
      * 2)</code>
      * </pre>
-     * 
+     *
      * </td>
      * <td>
-     * 
+     *
      * <pre>
      * <samp>box[2.0, 2.0, 2.0 -> 4.0, 4.0, 4.0]</samp>
      * </pre>
-     * 
+     *
      * </td>
      * </tr>
      * <tr>
      * <td>
-     * 
+     *
      * <pre>
      * <code>new AxisAlignedBB(5, 5, 5, 7, 7, 7).contract(0, 1, -
      * 1)</code>
      * </pre>
-     * 
+     *
      * </td>
      * <td>
-     * 
+     *
      * <pre>
      * <samp>box[5.0, 5.0, 6.0 -> 7.0, 6.0, 7.0]</samp>
      * </pre>
-     * 
+     *
      * </td>
      * </tr>
      * <tr>
      * <td>
-     * 
+     *
      * <pre>
      * <code>new AxisAlignedBB(-2, -2, -2, 2, 2, 2).contract(4, -4,
      * 0)</code>
      * </pre>
-     * 
+     *
      * </td>
      * <td>
-     * 
+     *
      * <pre>
      * <samp>box[-8.0, 2.0, -2.0 -> -2.0, 8.0, 2.0]</samp>
      * </pre>
-     * 
+     *
      * </td>
      * </tr>
      * </table>
@@ -245,53 +220,53 @@ public class AxisAlignedBB {
      * </tr>
      * <tr>
      * <td>
-     * 
+     *
      * <pre>
      * <code>new AxisAlignedBB(0, 0, 0, 1, 1, 1).expand(2, 2, 2)</code>
      * </pre>
-     * 
+     *
      * </td>
      * <td>
-     * 
+     *
      * <pre>
      * <samp>box[0, 0,
      * 0 -> 3, 3, 3]</samp>
      * </pre>
-     * 
+     *
      * </td>
      * <td>
      * <tr>
      * <td>
-     * 
+     *
      * <pre>
      * <code>new AxisAlignedBB(0, 0, 0, 1, 1, 1).expand(-2, -2, -2)</code>
      * </pre>
-     * 
+     *
      * </td>
      * <td>
-     * 
+     *
      * <pre>
      * <samp>box[-2,
      * -2, -2 -> 1, 1, 1]</samp>
      * </pre>
-     * 
+     *
      * </td>
      * <td>
      * <tr>
      * <td>
-     * 
+     *
      * <pre>
      * <code>new AxisAlignedBB(5, 5, 5, 7, 7, 7).expand(0, 1, -1)</code>
      * </pre>
-     * 
+     *
      * </td>
      * <td>
-     * 
+     *
      * <pre>
      * <samp>box[5, 5,
      * 4, 7, 8, 7]</samp>
      * </pre>
-     * 
+     *
      * </td>
      * <td>
      * </table>
@@ -351,70 +326,70 @@ public class AxisAlignedBB {
      * </tr>
      * <tr>
      * <td>
-     * 
+     *
      * <pre>
      * <code>new AxisAlignedBB(0, 0, 0, 1, 1, 1).grow(2, 2, 2)</code>
      * </pre>
-     * 
+     *
      * </td>
      * <td>
-     * 
+     *
      * <pre>
      * <samp>box[-2.0, -
      * 2.0, -2.0 -> 3.0, 3.0, 3.0]</samp>
      * </pre>
-     * 
+     *
      * </td>
      * </tr>
      * <tr>
      * <td>
-     * 
+     *
      * <pre>
      * <code>new AxisAlignedBB(0, 0, 0, 6, 6, 6).grow(-2, -2, -2)</code>
      * </pre>
-     * 
+     *
      * </td>
      * <td>
-     * 
+     *
      * <pre>
      * <samp>box[2.0,
      * 2.0, 2.0 -> 4.0, 4.0, 4.0]</samp>
      * </pre>
-     * 
+     *
      * </td>
      * </tr>
      * <tr>
      * <td>
-     * 
+     *
      * <pre>
      * <code>new AxisAlignedBB(5, 5, 5, 7, 7, 7).grow(0, 1, -1)</code>
      * </pre>
-     * 
+     *
      * </td>
      * <td>
-     * 
+     *
      * <pre>
      * <samp>box[5.0,
      * 4.0, 6.0 -> 7.0, 8.0, 6.0]</samp>
      * </pre>
-     * 
+     *
      * </td>
      * </tr>
      * <tr>
      * <td>
-     * 
+     *
      * <pre>
      * <code>new AxisAlignedBB(1, 1, 1, 3, 3, 3).grow(-4, -2, -3)</code>
      * </pre>
-     * 
+     *
      * </td>
      * <td>
-     * 
+     *
      * <pre>
      * <samp>box[-1.0,
      * 1.0, 0.0 -> 5.0, 3.0, 4.0]</samp>
      * </pre>
-     * 
+     *
      * </td>
      * </tr>
      * </table>
@@ -619,15 +594,6 @@ public class AxisAlignedBB {
         }
     }
 
-    /**
-     * Returns the average length of the edges of the bounding box.
-     */
-    public double getAverageEdgeLength() {
-        double d0 = this.maxX - this.minX;
-        double d1 = this.maxY - this.minY;
-        double d2 = this.maxZ - this.minZ;
-        return (d0 + d1 + d2) / 3.0D;
-    }
 
     /**
      * Creates a new {@link AxisAlignedBB} that is expanded by the given value in all directions. Equivalent to {@link
@@ -729,20 +695,6 @@ public class AxisAlignedBB {
         return vec.x >= this.minX && vec.x <= this.maxX && vec.y >= this.minY && vec.y <= this.maxY;
     }
 
-    public String toString() {
-        return "box[" + this.minX
-            + ", "
-            + this.minY
-            + ", "
-            + this.minZ
-            + " -> "
-            + this.maxX
-            + ", "
-            + this.maxY
-            + ", "
-            + this.maxZ
-            + "]";
-    }
 
     @SideOnly(Side.CLIENT)
     public boolean hasNaN() {

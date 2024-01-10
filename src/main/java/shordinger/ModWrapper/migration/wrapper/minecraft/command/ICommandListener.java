@@ -5,6 +5,6 @@ public interface ICommandListener {
     /**
      * Send an informative message to the server operators
      */
-    void notifyListener(ICommandSender sender, ICommand command, int flags, String translationKey,
-        Object... translationArgs);
+    void notifyListener(IWrapperCommandSender sender, ICommand command, int flags, String translationKey,
+                        Object... translationArgs);
 }

@@ -6,9 +6,6 @@ import java.util.UUID;
 import javax.annotation.Nullable;
 
 import net.minecraft.block.Block;
-import net.minecraft.block.properties.IProperty;
-import net.minecraft.block.state.BlockStateContainer;
-import net.minecraft.block.state.IWrapperBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StringUtils;
@@ -22,6 +19,9 @@ import com.google.common.collect.UnmodifiableIterator;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 
+import shordinger.ModWrapper.migration.wrapper.minecraft.block.properties.IProperty;
+import shordinger.ModWrapper.migration.wrapper.minecraft.block.state.BlockStateContainer;
+import shordinger.ModWrapper.migration.wrapper.minecraft.block.state.IBlockState;
 import shordinger.ModWrapper.migration.wrapper.minecraft.util.math.BlockPos;
 
 public final class NBTUtil {
@@ -136,48 +136,48 @@ public final class NBTUtil {
             return false;
         } else if (!nbt1.getClass()
             .equals(nbt2.getClass())) {
-                return false;
-            } else if (nbt1 instanceof NBTTagCompound) {
-                NBTTagCompound nbttagcompound = (NBTTagCompound) nbt1;
-                NBTTagCompound nbttagcompound1 = (NBTTagCompound) nbt2;
+            return false;
+        } else if (nbt1 instanceof NBTTagCompound) {
+            NBTTagCompound nbttagcompound = (NBTTagCompound) nbt1;
+            NBTTagCompound nbttagcompound1 = (NBTTagCompound) nbt2;
 
-                for (String s : nbttagcompound.getKeySet()) {
-                    NBTBase nbtbase1 = nbttagcompound.getTag(s);
+            for (String s : nbttagcompound.getKeySet()) {
+                NBTBase nbtbase1 = nbttagcompound.getTag(s);
 
-                    if (!areNBTEquals(nbtbase1, nbttagcompound1.getTag(s), compareTagList)) {
+                if (!areNBTEquals(nbtbase1, nbttagcompound1.getTag(s), compareTagList)) {
+                    return false;
+                }
+            }
+
+            return true;
+        } else if (nbt1 instanceof NBTTagList && compareTagList) {
+            NBTTagList nbttaglist = (NBTTagList) nbt1;
+            NBTTagList nbttaglist1 = (NBTTagList) nbt2;
+
+            if (nbttaglist.hasNoTags()) {
+                return nbttaglist1.hasNoTags();
+            } else {
+                for (int i = 0; i < nbttaglist.tagCount(); ++i) {
+                    NBTBase nbtbase = nbttaglist.get(i);
+                    boolean flag = false;
+
+                    for (int j = 0; j < nbttaglist1.tagCount(); ++j) {
+                        if (areNBTEquals(nbtbase, nbttaglist1.get(j), compareTagList)) {
+                            flag = true;
+                            break;
+                        }
+                    }
+
+                    if (!flag) {
                         return false;
                     }
                 }
 
                 return true;
-            } else if (nbt1 instanceof NBTTagList && compareTagList) {
-                NBTTagList nbttaglist = (NBTTagList) nbt1;
-                NBTTagList nbttaglist1 = (NBTTagList) nbt2;
-
-                if (nbttaglist.hasNoTags()) {
-                    return nbttaglist1.hasNoTags();
-                } else {
-                    for (int i = 0; i < nbttaglist.tagCount(); ++i) {
-                        NBTBase nbtbase = nbttaglist.get(i);
-                        boolean flag = false;
-
-                        for (int j = 0; j < nbttaglist1.tagCount(); ++j) {
-                            if (areNBTEquals(nbtbase, nbttaglist1.get(j), compareTagList)) {
-                                flag = true;
-                                break;
-                            }
-                        }
-
-                        if (!flag) {
-                            return false;
-                        }
-                    }
-
-                    return true;
-                }
-            } else {
-                return nbt1.equals(nbt2);
             }
+        } else {
+            return nbt1.equals(nbt2);
+        }
     }
 
     /**
@@ -218,12 +218,12 @@ public final class NBTUtil {
     /**
      * Reads a blockstate from the given tag.
      */
-    public static IWrapperBlockState readBlockState(NBTTagCompound tag) {
+    public static IBlockState readBlockState(NBTTagCompound tag) {
         if (!tag.hasKey("Name", 8)) {
             return Blocks.AIR.getDefaultState();
         } else {
             Block block = Block.REGISTRY.getObject(new ResourceLocation(tag.getString("Name")));
-            IWrapperBlockState iblockstate = block.getDefaultState();
+            IBlockState iblockstate = block.getDefaultState();
 
             if (tag.hasKey("Properties", 10)) {
                 NBTTagCompound nbttagcompound = tag.getCompoundTag("Properties");
@@ -242,8 +242,8 @@ public final class NBTUtil {
         }
     }
 
-    private static <T extends Comparable<T>> IWrapperBlockState setValueHelper(IWrapperBlockState p_193590_0_,
-        IProperty<T> p_193590_1_, String p_193590_2_, NBTTagCompound p_193590_3_, NBTTagCompound p_193590_4_) {
+    private static <T extends Comparable<T>> IBlockState setValueHelper(IBlockState p_193590_0_,
+                                                                        IProperty<T> p_193590_1_, String p_193590_2_, NBTTagCompound p_193590_3_, NBTTagCompound p_193590_4_) {
         Optional<T> optional = p_193590_1_.parseValue(p_193590_3_.getString(p_193590_2_));
 
         if (optional.isPresent()) {
@@ -261,7 +261,7 @@ public final class NBTUtil {
     /**
      * Writes the given blockstate to the given tag.
      */
-    public static NBTTagCompound writeBlockState(NBTTagCompound tag, IWrapperBlockState state) {
+    public static NBTTagCompound writeBlockState(NBTTagCompound tag, IBlockState state) {
         tag.setString("Name", ((ResourceLocation) Block.REGISTRY.getNameForObject(state.getBlock())).toString());
 
         if (!state.getProperties()

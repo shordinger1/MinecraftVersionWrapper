@@ -21,7 +21,6 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ReportedException;
 import net.minecraft.world.EnumSkyBlock;
-import net.minecraft.world.World;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
@@ -36,12 +35,12 @@ import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.ModContainer;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import shordinger.ModWrapper.migration.wrapper.minecraft.block.state.IWrapperBlockState;
+import shordinger.ModWrapper.migration.wrapper.minecraft.block.state.IBlockState;
 import shordinger.ModWrapper.migration.wrapper.minecraft.init.Biomes;
 import shordinger.ModWrapper.migration.wrapper.minecraft.util.ClassInheritanceMultiMap;
 import shordinger.ModWrapper.migration.wrapper.minecraft.util.math.BlockPos;
 import shordinger.ModWrapper.migration.wrapper.minecraft.util.math.ChunkPos;
-import shordinger.ModWrapper.migration.wrapper.minecraft.world.WrapperWorld;
+import shordinger.ModWrapper.migration.wrapper.minecraft.world.World;
 import shordinger.ModWrapper.migration.wrapper.minecraft.world.biome.Biome;
 import shordinger.ModWrapper.migration.wrapper.minecraft.world.biome.BiomeProvider;
 import shordinger.ModWrapper.migration.wrapper.minecraftforge.common.capabilities.Capability;
@@ -104,7 +103,7 @@ public class WrapperChunk extends Chunk implements ICapabilityProvider {
     private final ConcurrentLinkedQueue<BlockPos> tileEntityPosQueue;
     public boolean unloadQueued;
 
-    public WrapperChunk(WrapperWorld worldIn, int x, int z) {
+    public WrapperChunk(World worldIn, int x, int z) {
         super(worldIn, x, z);
         // this.storageArrays = new ExtendedBlockStorage[16];
         // this.blockBiomeArray = new byte[256];
@@ -129,7 +128,7 @@ public class WrapperChunk extends Chunk implements ICapabilityProvider {
         capabilities = net.minecraftforge.event.ForgeEventFactory.gatherCapabilities(this);// TODO
     }
 
-    public WrapperChunk(WrapperWorld worldIn, ChunkPrimer primer, int x, int z) {
+    public WrapperChunk(World worldIn, ChunkPrimer primer, int x, int z) {
         this(worldIn, x, z);
         int i = 256;
         boolean flag = worldIn.provider.hasSkyLight();
@@ -137,7 +136,7 @@ public class WrapperChunk extends Chunk implements ICapabilityProvider {
         for (int j = 0; j < 16; ++j) {
             for (int k = 0; k < 16; ++k) {
                 for (int l = 0; l < 256; ++l) {
-                    IWrapperBlockState iblockstate = primer.getBlockState(j, l, k);
+                    IBlockState iblockstate = primer.getBlockState(j, l, k);
 
                     if (iblockstate.getMaterial() != Material.AIR) {
                         int i1 = l >> 4;
@@ -189,7 +188,7 @@ public class WrapperChunk extends Chunk implements ICapabilityProvider {
                 this.precipitationHeightMap[j + (k << 4)] = -999;
 
                 for (int l = i + 16; l > 0; --l) {
-                    IWrapperBlockState iblockstate = this.getBlockState(j, l - 1, k);
+                    IBlockState iblockstate = this.getBlockState(j, l - 1, k);
 
                     if (this.getBlockLightOpacity(j, l - 1, k) != 0) {
                         this.heightMap[k << 4 | j] = l;
@@ -442,20 +441,20 @@ public class WrapperChunk extends Chunk implements ICapabilityProvider {
     }
 
     private int getBlockLightOpacity(int x, int y, int z) {
-        IWrapperBlockState state = this.getBlockState(x, y, z); // Forge: Can sometimes be called before we are added to
+        IBlockState state = this.getBlockState(x, y, z); // Forge: Can sometimes be called before we are added to
                                                                 // the global world list. So use the less accurate one
                                                                 // during that. It'll be recalculated later
         return !loaded ? state.getLightOpacity()
             : state.getLightOpacity(world, new BlockPos(this.x << 4 | x & 15, y, this.z << 4 | z & 15));
     }
 
-    public IWrapperBlockState getBlockState(BlockPos pos) {
+    public IBlockState getBlockState(BlockPos pos) {
         return this.getBlockState(pos.getX(), pos.getY(), pos.getZ());
     }
 
-    public IWrapperBlockState getBlockState(final int x, final int y, final int z) {
+    public IBlockState getBlockState(final int x, final int y, final int z) {
         if (getWorld().getWorldType() == WorldType.DEBUG_ALL_BLOCK_STATES) {
-            IWrapperBlockState iblockstate = null;
+            IBlockState iblockstate = null;
 
             if (y == 60) {
                 iblockstate = Blocks.BARRIER.getDefaultState();
@@ -492,7 +491,7 @@ public class WrapperChunk extends Chunk implements ICapabilityProvider {
     }
 
     @Nullable
-    public IWrapperBlockState setBlockState(BlockPos pos, IWrapperBlockState state) {
+    public IBlockState setBlockState(BlockPos pos, IBlockState state) {
         int i = pos.getX() & 15;
         int j = pos.getY();
         int k = pos.getZ() & 15;
@@ -503,7 +502,7 @@ public class WrapperChunk extends Chunk implements ICapabilityProvider {
         }
 
         int i1 = this.heightMap[l];
-        IWrapperBlockState iblockstate = this.getBlockState(pos);
+        IBlockState iblockstate = this.getBlockState(pos);
 
         if (iblockstate == state) {
             return null;
@@ -729,7 +728,7 @@ public class WrapperChunk extends Chunk implements ICapabilityProvider {
 
     @Nullable
     private TileEntity createNewTileEntity(BlockPos pos) {
-        IWrapperBlockState iblockstate = this.getBlockState(pos);
+        IBlockState iblockstate = this.getBlockState(pos);
         Block block = iblockstate.getBlock();
         return !block.hasTileEntity(iblockstate) ? null : block.createTileEntity(getWorld(), iblockstate);
     }
@@ -838,8 +837,8 @@ public class WrapperChunk extends Chunk implements ICapabilityProvider {
      */
     public void getEntitiesWithinAABBForEntity(@Nullable Entity entityIn, AxisAlignedBB aabb, List<Entity> listToFill,
         Predicate<? super Entity> filter) {
-        int i = MathHelper.floor((aabb.minY - World.MAX_ENTITY_RADIUS) / 16.0D);
-        int j = MathHelper.floor((aabb.maxY + World.MAX_ENTITY_RADIUS) / 16.0D);
+        int i = MathHelper.floor((aabb.minY - net.minecraft.world.World.MAX_ENTITY_RADIUS) / 16.0D);
+        int j = MathHelper.floor((aabb.maxY + net.minecraft.world.World.MAX_ENTITY_RADIUS) / 16.0D);
         i = MathHelper.clamp(i, 0, this.entityLists.length - 1);
         j = MathHelper.clamp(j, 0, this.entityLists.length - 1);
 
@@ -873,8 +872,8 @@ public class WrapperChunk extends Chunk implements ICapabilityProvider {
      */
     public <T extends Entity> void getEntitiesOfTypeWithinAABB(Class<? extends T> entityClass, AxisAlignedBB aabb,
         List<T> listToFill, Predicate<? super T> filter) {
-        int i = MathHelper.floor((aabb.minY - World.MAX_ENTITY_RADIUS) / 16.0D);
-        int j = MathHelper.floor((aabb.maxY + World.MAX_ENTITY_RADIUS) / 16.0D);
+        int i = MathHelper.floor((aabb.minY - net.minecraft.world.World.MAX_ENTITY_RADIUS) / 16.0D);
+        int j = MathHelper.floor((aabb.maxY + net.minecraft.world.World.MAX_ENTITY_RADIUS) / 16.0D);
         i = MathHelper.clamp(i, 0, this.entityLists.length - 1);
         j = MathHelper.clamp(j, 0, this.entityLists.length - 1);
 
@@ -976,7 +975,7 @@ public class WrapperChunk extends Chunk implements ICapabilityProvider {
             int i1 = -1;
 
             while (blockpos.getY() > 0 && i1 == -1) {
-                IWrapperBlockState iblockstate = this.getBlockState(blockpos);
+                IBlockState iblockstate = this.getBlockState(blockpos);
                 Material material = iblockstate.getMaterial();
 
                 if (!material.blocksMovement() && !material.isLiquid()) {
@@ -1322,8 +1321,8 @@ public class WrapperChunk extends Chunk implements ICapabilityProvider {
         super.isChunkLoaded = loaded;
     }
 
-    public WrapperWorld getWorld() {
-        return (WrapperWorld) super.worldObj;
+    public World getWorld() {
+        return (World) super.worldObj;
     }
 
     public int[] getHeightMap() {

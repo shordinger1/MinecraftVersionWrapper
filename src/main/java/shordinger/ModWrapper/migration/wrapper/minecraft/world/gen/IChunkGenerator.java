@@ -6,10 +6,10 @@ import javax.annotation.Nullable;
 
 import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.world.World;
-import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.Chunk;
 
 import shordinger.ModWrapper.migration.wrapper.minecraft.util.math.BlockPos;
+import shordinger.ModWrapper.migration.wrapper.minecraft.world.biome.Biome;
 
 public interface IChunkGenerator {
 

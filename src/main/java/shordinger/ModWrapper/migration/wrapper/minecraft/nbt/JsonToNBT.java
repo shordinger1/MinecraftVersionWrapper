@@ -6,7 +6,7 @@ import java.util.regex.Pattern;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 
-public class JsonToNBT {
+public class JsonToNBT extends net.minecraft.nbt.JsonToNBT {
 
     private static final Pattern DOUBLE_PATTERN_NOSUFFIX = Pattern
         .compile("[-+]?(?:[0-9]+[.]|[0-9]*[.][0-9]+)(?:e[-+]?[0-9]+)?", 2);

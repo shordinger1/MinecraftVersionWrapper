@@ -12,8 +12,8 @@ import shordinger.ModWrapper.migration.wrapper.minecraft.util.math.BlockPos;
 
 public interface IWorldEventListener {
 
-    void notifyBlockUpdate(WrapperWorld wrapperWorldIn, BlockPos pos, IWrapperBlockState oldState,
-        IWrapperBlockState newState, int flags);
+    void notifyBlockUpdate(World worldIn, BlockPos pos, IWrapperBlockState oldState,
+                           IWrapperBlockState newState, int flags);
 
     void notifyLightSet(BlockPos pos);
 

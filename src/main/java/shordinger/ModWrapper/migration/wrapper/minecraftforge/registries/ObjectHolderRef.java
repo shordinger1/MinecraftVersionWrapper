@@ -26,9 +26,7 @@ import java.util.Queue;
 import javax.annotation.Nullable;
 
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.common.FMLLog;
-import net.minecraftforge.fml.common.registry.GameRegistry;
-import net.minecraftforge.fml.common.registry.GameRegistry.ObjectHolder;
+import shordinger.ModWrapper.migration.wrapper.minecraftforge.fml.common.registry.WrapperGameRegistry;
 
 /**
  * Internal class used in tracking {@link ObjectHolder} references
@@ -94,7 +92,7 @@ class ObjectHolderRef {
             Class<?> type = typesToExamine.remove();
             Collections.addAll(typesToExamine, type.getInterfaces());
             if (IForgeRegistryEntry.class.isAssignableFrom(type)) {
-                registry = (ForgeRegistry<?>) GameRegistry.findRegistry((Class<IForgeRegistryEntry>) type);
+                registry = (ForgeRegistry<?>) WrapperGameRegistry.findRegistry((Class<IForgeRegistryEntry>) type);
                 final Class<?> parentType = type.getSuperclass();
                 if (parentType != null) {
                     typesToExamine.add(parentType);

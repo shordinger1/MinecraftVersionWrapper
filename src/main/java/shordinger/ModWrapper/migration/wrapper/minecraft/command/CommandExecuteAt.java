@@ -33,14 +33,14 @@ public class CommandExecuteAt extends CommandBase {
     /**
      * Gets the usage string for the command.
      */
-    public String getUsage(ICommandSender sender) {
+    public String getUsage(IWrapperCommandSender sender) {
         return "commands.execute.usage";
     }
 
     /**
      * Callback for when the command is executed
      */
-    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
+    public void execute(MinecraftServer server, IWrapperCommandSender sender, String[] args) throws CommandException {
         if (args.length < 5) {
             throw new WrongUsageException("commands.execute.usage", new Object[0]);
         } else {
@@ -78,7 +78,7 @@ public class CommandExecuteAt extends CommandBase {
             }
 
             String s = buildString(args, i);
-            ICommandSender icommandsender = CommandSenderWrapper.create(sender)
+            IWrapperCommandSender icommandsender = WrapperCommandSenderWrapper.create(sender)
                 .withEntity(entity, new Vec3d(d0, d1, d2))
                 .withSendCommandFeedback(
                     server.worlds[0].getGameRules()
@@ -100,8 +100,8 @@ public class CommandExecuteAt extends CommandBase {
     /**
      * Get a list of options for when the user presses the TAB key
      */
-    public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args,
-        @Nullable BlockPos targetPos) {
+    public List<String> getTabCompletions(MinecraftServer server, IWrapperCommandSender sender, String[] args,
+                                          @Nullable BlockPos targetPos) {
         if (args.length == 1) {
             return getListOfStringsMatchingLastWord(args, server.getOnlinePlayerNames());
         } else if (args.length > 1 && args.length <= 4) {

@@ -106,7 +106,7 @@ public class FunctionObject {
             this.command = p_i47534_1_;
         }
 
-        public void execute(FunctionManager functionManagerIn, ICommandSender sender,
+        public void execute(FunctionManager functionManagerIn, IWrapperCommandSender sender,
             ArrayDeque<FunctionManager.QueuedCommand> commandQueue, int maxCommandChainLength) {
             functionManagerIn.getCommandManager()
                 .executeCommand(sender, this.command);
@@ -119,7 +119,7 @@ public class FunctionObject {
 
     public interface Entry {
 
-        void execute(FunctionManager functionManagerIn, ICommandSender sender,
+        void execute(FunctionManager functionManagerIn, IWrapperCommandSender sender,
             ArrayDeque<FunctionManager.QueuedCommand> commandQueue, int maxCommandChainLength);
     }
 
@@ -131,7 +131,7 @@ public class FunctionObject {
             this.function = new FunctionObject.CacheableFunction(functionIn);
         }
 
-        public void execute(FunctionManager functionManagerIn, ICommandSender sender,
+        public void execute(FunctionManager functionManagerIn, IWrapperCommandSender sender,
             ArrayDeque<FunctionManager.QueuedCommand> commandQueue, int maxCommandChainLength) {
             FunctionObject functionobject = this.function.get(functionManagerIn);
 

@@ -1,13 +1,15 @@
 package shordinger.ModWrapper.migration.wrapper.minecraft.block.material;
 
-import net.minecraft.item.EnumDyeColor;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import shordinger.ModWrapper.migration.wrapper.minecraft.item.EnumDyeColor;
 
 public class MapColor {
 
-    /** Holds all the 16 colors used on maps, very similar of a pallete system. */
+    /**
+     * Holds all the 16 colors used on maps, very similar of a pallete system.
+     */
     public static final MapColor[] COLORS = new MapColor[64];
     public static final MapColor[] BLOCK_COLORS = new MapColor[16];
     public static final MapColor AIR = new MapColor(0, 0);
@@ -62,10 +64,23 @@ public class MapColor {
     public static final MapColor GREEN_STAINED_HARDENED_CLAY = new MapColor(49, 5001770);
     public static final MapColor RED_STAINED_HARDENED_CLAY = new MapColor(50, 9321518);
     public static final MapColor BLACK_STAINED_HARDENED_CLAY = new MapColor(51, 2430480);
-    /** Holds the color in RGB value that will be rendered on maps. */
+    /**
+     * Holds the color in RGB value that will be rendered on maps.
+     */
     public final int colorValue;
-    /** Holds the index of the color used on map. */
+    /**
+     * Holds the index of the color used on map.
+     */
     public final int colorIndex;
+
+    public net.minecraft.block.material.MapColor getMapColor() {
+        if (colorIndex > 35) return null;
+        return net.minecraft.block.material.MapColor.mapColorArray[colorIndex];
+    }
+
+    public static MapColor getTempMapColor(MapColor mapColor) {
+        return MapColor.COLORS[mapColor.colorIndex];
+    }
 
     private MapColor(int index, int color) {
         if (index >= 0 && index <= 63) {

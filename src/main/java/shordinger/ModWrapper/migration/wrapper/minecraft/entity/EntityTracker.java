@@ -169,7 +169,7 @@ public class EntityTracker {
             }
 
             EntityTrackerEntry entitytrackerentry = new EntityTrackerEntry(
-                entityIn,
+                    entityIn,
                 trackingRange,
                 this.maxTrackingDistanceThreshold,
                 updateFrequency,
@@ -276,7 +276,7 @@ public class EntityTracker {
     // don't expose the EntityTrackerEntry directly so mods can't mess with the data in there as easily
     /**
      * Get all players tracking the given Entity. The Entity must be part of the World that this Tracker belongs to.
-     * 
+     *
      * @param entity the Entity
      * @return all players tracking the Entity
      */

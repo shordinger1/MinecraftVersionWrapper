@@ -20,7 +20,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTUtil;
 import net.minecraft.network.play.server.SPacketSetSlot;
-import net.minecraft.util.NonNullList;
+import shordinger.ModWrapper.migration.wrapper.minecraft.util.NonNullList;
 import net.minecraft.util.ReportedException;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
@@ -207,7 +207,7 @@ public class InventoryPlayer implements IInventory {
 
     /**
      * Removes matching items from the inventory.
-     * 
+     *
      * @param itemIn      The item to match, null ignores.
      * @param metadataIn  The metadata to match, -1 ignores.
      * @param removeCount The number of items to remove. If less than 1, removes all matching items.

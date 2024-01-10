@@ -187,15 +187,15 @@ public class PotionUtils {
             for (PotionEffect potioneffect : list) {
                 String s1 = I18n.translateToLocal(potioneffect.getEffectName())
                     .trim();
-                Potion potion = potioneffect.getPotion();
-                Map<IAttribute, AttributeModifier> map = potion.getAttributeModifierMap();
+                WrapperPotion wrapperPotion = potioneffect.getPotion();
+                Map<IAttribute, AttributeModifier> map = wrapperPotion.getAttributeModifierMap();
 
                 if (!map.isEmpty()) {
                     for (Entry<IAttribute, AttributeModifier> entry : map.entrySet()) {
                         AttributeModifier attributemodifier = entry.getValue();
                         AttributeModifier attributemodifier1 = new AttributeModifier(
                             attributemodifier.getName(),
-                            potion.getAttributeModifierAmount(potioneffect.getAmplifier(), attributemodifier),
+                            wrapperPotion.getAttributeModifierAmount(potioneffect.getAmplifier(), attributemodifier),
                             attributemodifier.getOperation());
                         list1.add(new Tuple(((IAttribute) entry.getKey()).getName(), attributemodifier1));
                     }
@@ -208,10 +208,10 @@ public class PotionUtils {
                 }
 
                 if (potioneffect.getDuration() > 20) {
-                    s1 = s1 + " (" + Potion.getPotionDurationString(potioneffect, durationFactor) + ")";
+                    s1 = s1 + " (" + WrapperPotion.getPotionDurationString(potioneffect, durationFactor) + ")";
                 }
 
-                if (potion.isBadEffect()) {
+                if (wrapperPotion.isBadEffect()) {
                     lores.add(TextFormatting.RED + s1);
                 } else {
                     lores.add(TextFormatting.BLUE + s1);

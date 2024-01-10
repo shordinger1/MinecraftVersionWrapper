@@ -124,7 +124,7 @@ public class RegistryBuilder<T extends IForgeRegistryEntry<T>> {
     }
 
     public IForgeRegistry<T> create() {
-        return RegistryManager.ACTIVE.createRegistry(
+        return WrapperRegistryManager.ACTIVE.createRegistry(
             registryName,
             registryType,
             optionalDefaultKey,

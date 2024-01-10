@@ -114,7 +114,7 @@ public class EntityTrackerEntry {
     public final Set<EntityPlayerMP> trackingPlayers = Sets.<EntityPlayerMP>newHashSet();
 
     public EntityTrackerEntry(Entity entityIn, int rangeIn, int maxRangeIn, int updateFrequencyIn,
-        boolean sendVelocityUpdatesIn) {
+                              boolean sendVelocityUpdatesIn) {
         this.trackedEntity = entityIn;
         this.range = rangeIn;
         this.maxRange = maxRangeIn;

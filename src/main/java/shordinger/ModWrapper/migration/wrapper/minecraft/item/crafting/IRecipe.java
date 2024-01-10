@@ -2,7 +2,7 @@ package shordinger.ModWrapper.migration.wrapper.minecraft.item.crafting;
 
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.NonNullList;
+import shordinger.ModWrapper.migration.wrapper.minecraft.util.NonNullList;
 import net.minecraft.world.World;
 
 public interface IRecipe extends net.minecraftforge.registries.IForgeRegistryEntry<IRecipe> {

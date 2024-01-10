@@ -5,17 +5,17 @@ import java.lang.reflect.InvocationTargetException;
 
 public enum DimensionType {
 
-    OVERWORLD(0, "overworld", "", WorldProviderSurface.class),
-    NETHER(-1, "the_nether", "_nether", WorldProviderHell.class),
-    THE_END(1, "the_end", "_end", WorldProviderEnd.class);
+    OVERWORLD(0, "overworld", "", WrapperWorldProviderSurface.class),
+    NETHER(-1, "the_nether", "_nether", WrapperWorldProviderHell.class),
+    THE_END(1, "the_end", "_end", WrapperWorldProviderEnd.class);
 
     private final int id;
     private final String name;
     private final String suffix;
-    private final Class<? extends WorldProvider> clazz;
+    private final Class<? extends WrapperWorldProvider> clazz;
     private boolean shouldLoadSpawn = false;
 
-    private DimensionType(int idIn, String nameIn, String suffixIn, Class<? extends WorldProvider> clazzIn) {
+    private DimensionType(int idIn, String nameIn, String suffixIn, Class<? extends WrapperWorldProvider> clazzIn) {
         this.id = idIn;
         this.name = nameIn;
         this.suffix = suffixIn;
@@ -35,9 +35,9 @@ public enum DimensionType {
         return this.suffix;
     }
 
-    public WorldProvider createDimension() {
+    public WrapperWorldProvider createDimension() {
         try {
-            Constructor<? extends WorldProvider> constructor = this.clazz.getConstructor();
+            Constructor<? extends WrapperWorldProvider> constructor = this.clazz.getConstructor();
             return constructor.newInstance();
         } catch (NoSuchMethodException nosuchmethodexception) {
             throw new Error("Could not create new dimension", nosuchmethodexception);
@@ -74,7 +74,7 @@ public enum DimensionType {
         net.minecraftforge.common.util.EnumHelper.testEnum(DimensionType.class, ENUM_ARGS);
     }
 
-    public static DimensionType register(String name, String suffix, int id, Class<? extends WorldProvider> provider,
+    public static DimensionType register(String name, String suffix, int id, Class<? extends WrapperWorldProvider> provider,
         boolean keepLoaded) {
         String enum_name = name.replace(" ", "_")
             .toLowerCase();

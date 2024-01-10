@@ -10,7 +10,7 @@ public class CommandShowSeed extends CommandBase {
     /**
      * Check if the given ICommandSender has permission to execute this command
      */
-    public boolean checkPermission(MinecraftServer server, ICommandSender sender) {
+    public boolean checkPermission(MinecraftServer server, IWrapperCommandSender sender) {
         return server.isSinglePlayer() || super.checkPermission(server, sender);
     }
 
@@ -31,14 +31,14 @@ public class CommandShowSeed extends CommandBase {
     /**
      * Gets the usage string for the command.
      */
-    public String getUsage(ICommandSender sender) {
+    public String getUsage(IWrapperCommandSender sender) {
         return "commands.seed.usage";
     }
 
     /**
      * Callback for when the command is executed
      */
-    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
+    public void execute(MinecraftServer server, IWrapperCommandSender sender, String[] args) throws CommandException {
         World world = (World) (sender instanceof EntityPlayer ? ((EntityPlayer) sender).world : server.getWorld(0));
         sender.sendMessage(new TextComponentTranslation("commands.seed.success", new Object[] { world.getSeed() }));
     }

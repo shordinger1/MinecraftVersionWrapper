@@ -46,21 +46,21 @@ import com.google.common.collect.Lists;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import shordinger.ModWrapper.migration.wrapper.minecraft.block.state.IWrapperBlockState;
+import shordinger.ModWrapper.migration.wrapper.minecraft.block.state.IBlockState;
 import shordinger.ModWrapper.migration.wrapper.minecraft.init.WrapperBlocks;
 import shordinger.ModWrapper.migration.wrapper.minecraftforge.registries.IForgeRegistryEntry;
 
 public abstract class Biome extends IForgeRegistryEntry.Impl<Biome> {
 
     private static final Logger LOGGER = LogManager.getLogger();
-    protected static final IWrapperBlockState STONE = WrapperBlocks.STONE.getDefaultState();
-    protected static final IWrapperBlockState AIR = WrapperBlocks.AIR.getDefaultState();
-    protected static final IWrapperBlockState BEDROCK = WrapperBlocks.BEDROCK.getDefaultState();
-    protected static final IWrapperBlockState GRAVEL = WrapperBlocks.GRAVEL.getDefaultState();
-    protected static final IWrapperBlockState RED_SANDSTONE = WrapperBlocks.RED_SANDSTONE.getDefaultState();
-    protected static final IWrapperBlockState SANDSTONE = WrapperBlocks.SANDSTONE.getDefaultState();
-    protected static final IWrapperBlockState ICE = WrapperBlocks.ICE.getDefaultState();
-    protected static final IWrapperBlockState WATER = WrapperBlocks.WATER.getDefaultState();
+    protected static final IBlockState STONE = WrapperBlocks.STONE.getDefaultState();
+    protected static final IBlockState AIR = WrapperBlocks.AIR.getDefaultState();
+    protected static final IBlockState BEDROCK = WrapperBlocks.BEDROCK.getDefaultState();
+    protected static final IBlockState GRAVEL = WrapperBlocks.GRAVEL.getDefaultState();
+    protected static final IBlockState RED_SANDSTONE = WrapperBlocks.RED_SANDSTONE.getDefaultState();
+    protected static final IBlockState SANDSTONE = WrapperBlocks.SANDSTONE.getDefaultState();
+    protected static final IBlockState ICE = WrapperBlocks.ICE.getDefaultState();
+    protected static final IBlockState WATER = WrapperBlocks.WATER.getDefaultState();
     public static final ObjectIntIdentityMap<Biome> MUTATION_TO_BASE_ID_MAP = new ObjectIntIdentityMap<Biome>();
     protected static final NoiseGeneratorPerlin TEMPERATURE_NOISE = new NoiseGeneratorPerlin(new Random(1234L), 1);
     protected static final NoiseGeneratorPerlin GRASS_COLOR_NOISE = new NoiseGeneratorPerlin(new Random(2345L), 1);
@@ -92,9 +92,9 @@ public abstract class Biome extends IForgeRegistryEntry.Impl<Biome> {
     @Nullable
     private final String baseBiomeRegName;
     /** The block expected to be on the top of this biome */
-    public IWrapperBlockState topBlock = WrapperBlocks.GRASS.getDefaultState();
+    public IBlockState topBlock = WrapperBlocks.GRASS.getDefaultState();
     /** The block to fill spots in when not on the top */
-    public IWrapperBlockState fillerBlock = WrapperBlocks.DIRT.getDefaultState();
+    public IBlockState fillerBlock = WrapperBlocks.DIRT.getDefaultState();
     /** The biome decorator. */
     public BiomeDecorator decorator;
     /** Holds the classes of IMobs (hostile mobs) that can be spawned in the biome. */
@@ -278,8 +278,8 @@ public abstract class Biome extends IForgeRegistryEntry.Impl<Biome> {
     public final void generateBiomeTerrain(World worldIn, Random rand, ChunkPrimer chunkPrimerIn, int x, int z,
         double noiseVal) {
         int i = worldIn.getSeaLevel();
-        IWrapperBlockState iblockstate = this.topBlock;
-        IWrapperBlockState iblockstate1 = this.fillerBlock;
+        IBlockState iblockstate = this.topBlock;
+        IBlockState iblockstate1 = this.fillerBlock;
         int j = -1;
         int k = (int) (noiseVal / 3.0D + 3.0D + rand.nextDouble() * 0.25D);
         int l = x & 15;
@@ -290,7 +290,7 @@ public abstract class Biome extends IForgeRegistryEntry.Impl<Biome> {
             if (j1 <= rand.nextInt(5)) {
                 chunkPrimerIn.setBlockState(i1, j1, l, BEDROCK);
             } else {
-                IWrapperBlockState iblockstate2 = chunkPrimerIn.getBlockState(i1, j1, l);
+                IBlockState iblockstate2 = chunkPrimerIn.getBlockState(i1, j1, l);
 
                 if (iblockstate2.getMaterial() == Material.AIR) {
                     j = -1;
@@ -473,12 +473,12 @@ public abstract class Biome extends IForgeRegistryEntry.Impl<Biome> {
 
     /**
      * Register a new plant to be planted when bonemeal is used on grass.
-     * 
+     *
      * @param state  The block to place.
      * @param weight The weight of the plant, where red flowers are
      *               10 and yellow flowers are 20.
      */
-    public void addFlower(IWrapperBlockState state, int weight) {
+    public void addFlower(IBlockState state, int weight) {
         this.flowers.add(new FlowerEntry(state, weight));
     }
 

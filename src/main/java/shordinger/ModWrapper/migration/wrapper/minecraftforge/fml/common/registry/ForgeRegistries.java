@@ -33,7 +33,7 @@ import net.minecraftforge.registries.IForgeRegistry;
 /**
  * A class that exposes static references to all vanilla and Forge registries.
  * Created to have a central place to access the registries directly if modders need.
- * It is still advised that if you are registering things to go through {@link GameRegistry} register methods, but
+ * It is still advised that if you are registering things to go through {@link WrapperGameRegistry} register methods, but
  * queries and iterations can use this.
  */
 public class ForgeRegistries {
@@ -42,18 +42,18 @@ public class ForgeRegistries {
         init();
     } // This must be above the fields so we guarantee it's run before findRegistry is called. Yay static inializers
 
-    public static final IForgeRegistry<Block> BLOCKS = GameRegistry.findRegistry(Block.class);
-    public static final IForgeRegistry<Item> ITEMS = GameRegistry.findRegistry(Item.class);
-    public static final IForgeRegistry<Potion> POTIONS = GameRegistry.findRegistry(Potion.class);
-    public static final IForgeRegistry<Biome> BIOMES = GameRegistry.findRegistry(Biome.class);
-    public static final IForgeRegistry<SoundEvent> SOUND_EVENTS = GameRegistry.findRegistry(SoundEvent.class);
-    public static final IForgeRegistry<PotionType> POTION_TYPES = GameRegistry.findRegistry(PotionType.class);
-    public static final IForgeRegistry<Enchantment> ENCHANTMENTS = GameRegistry.findRegistry(Enchantment.class);
-    public static final IForgeRegistry<VillagerProfession> VILLAGER_PROFESSIONS = GameRegistry
+    public static final IForgeRegistry<Block> BLOCKS = WrapperGameRegistry.findRegistry(Block.class);
+    public static final IForgeRegistry<Item> ITEMS = WrapperGameRegistry.findRegistry(Item.class);
+    public static final IForgeRegistry<Potion> POTIONS = WrapperGameRegistry.findRegistry(Potion.class);
+    public static final IForgeRegistry<Biome> BIOMES = WrapperGameRegistry.findRegistry(Biome.class);
+    public static final IForgeRegistry<SoundEvent> SOUND_EVENTS = WrapperGameRegistry.findRegistry(SoundEvent.class);
+    public static final IForgeRegistry<PotionType> POTION_TYPES = WrapperGameRegistry.findRegistry(PotionType.class);
+    public static final IForgeRegistry<Enchantment> ENCHANTMENTS = WrapperGameRegistry.findRegistry(Enchantment.class);
+    public static final IForgeRegistry<VillagerProfession> VILLAGER_PROFESSIONS = WrapperGameRegistry
         .findRegistry(VillagerProfession.class);
-    public static final IForgeRegistry<EntityEntry> ENTITIES = GameRegistry.findRegistry(EntityEntry.class);
-    public static final IForgeRegistry<IRecipe> RECIPES = GameRegistry.findRegistry(IRecipe.class);
-    public static final IForgeRegistry<DataSerializerEntry> DATA_SERIALIZERS = GameRegistry
+    public static final IForgeRegistry<EntityEntry> ENTITIES = WrapperGameRegistry.findRegistry(EntityEntry.class);
+    public static final IForgeRegistry<IRecipe> RECIPES = WrapperGameRegistry.findRegistry(IRecipe.class);
+    public static final IForgeRegistry<DataSerializerEntry> DATA_SERIALIZERS = WrapperGameRegistry
         .findRegistry(DataSerializerEntry.class);
 
     /**

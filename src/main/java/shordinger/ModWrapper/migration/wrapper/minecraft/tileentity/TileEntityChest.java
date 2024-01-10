@@ -6,49 +6,57 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockChest;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
-import net.minecraft.init.SoundEvents;
-import net.minecraft.inventory.Container;
-import net.minecraft.inventory.ContainerChest;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.InventoryLargeChest;
-import net.minecraft.inventory.ItemStackHelper;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.ITickable;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.datafix.DataFixer;
-import net.minecraft.util.datafix.FixTypes;
-import net.minecraft.util.datafix.walkers.ItemStackDataLists;
 
+
+import net.minecraft.item.ItemStack;
+import shordinger.ModWrapper.migration.wrapper.minecraft.util.ITickable;
+import shordinger.ModWrapper.migration.wrapper.minecraft.util.NonNullList;
 import shordinger.ModWrapper.migration.wrapper.minecraft.util.math.AxisAlignedBB;
 import shordinger.ModWrapper.migration.wrapper.minecraft.util.math.BlockPos;
 
 public class TileEntityChest extends TileEntityLockableLoot implements ITickable {
 
     private NonNullList<ItemStack> chestContents = NonNullList.<ItemStack>withSize(27, ItemStack.EMPTY);
-    /** Determines if the check for adjacent chests has taken place. */
+    /**
+     * Determines if the check for adjacent chests has taken place.
+     */
     public boolean adjacentChestChecked;
-    /** Contains the chest tile located adjacent to this one (if any) */
+    /**
+     * Contains the chest tile located adjacent to this one (if any)
+     */
     public TileEntityChest adjacentChestZNeg;
-    /** Contains the chest tile located adjacent to this one (if any) */
+    /**
+     * Contains the chest tile located adjacent to this one (if any)
+     */
     public TileEntityChest adjacentChestXPos;
-    /** Contains the chest tile located adjacent to this one (if any) */
+    /**
+     * Contains the chest tile located adjacent to this one (if any)
+     */
     public TileEntityChest adjacentChestXNeg;
-    /** Contains the chest tile located adjacent to this one (if any) */
+    /**
+     * Contains the chest tile located adjacent to this one (if any)
+     */
     public TileEntityChest adjacentChestZPos;
-    /** The current angle of the lid (between 0 and 1) */
+    /**
+     * The current angle of the lid (between 0 and 1)
+     */
     public float lidAngle;
-    /** The angle of the lid last tick */
+    /**
+     * The angle of the lid last tick
+     */
     public float prevLidAngle;
-    /** The number of players currently using this chest */
+    /**
+     * The number of players currently using this chest
+     */
     public int numPlayersUsing;
-    /** Server sync counter (once per 20 ticks) */
+    /**
+     * Server sync counter (once per 20 ticks)
+     */
     private int ticksSinceSync;
     private BlockChest.Type cachedChestType;
 
-    public TileEntityChest() {}
+    public TileEntityChest() {
+    }
 
     public TileEntityChest(BlockChest.Type typeIn) {
         this.cachedChestType = typeIn;
@@ -81,7 +89,7 @@ public class TileEntityChest extends TileEntityLockableLoot implements ITickable
     public static void registerFixesChest(DataFixer fixer) {
         fixer.registerWalker(
             FixTypes.BLOCK_ENTITY,
-            new ItemStackDataLists(TileEntityChest.class, new String[] { "Items" }));
+            new ItemStackDataLists(TileEntityChest.class, new String[]{"Items"}));
     }
 
     public void readFromNBT(NBTTagCompound compound) {
@@ -166,7 +174,7 @@ public class TileEntityChest extends TileEntityLockableLoot implements ITickable
     public void checkForAdjacentChests() {
         if (!this.adjacentChestChecked) {
             if (this.world == null || !this.world.isAreaLoaded(this.pos, 1)) return; // Forge: prevent loading unloaded
-                                                                                     // chunks when checking neighbors
+            // chunks when checking neighbors
             this.adjacentChestChecked = true;
             this.adjacentChestXNeg = this.getAdjacentChest(EnumFacing.WEST);
             this.adjacentChestXPos = this.getAdjacentChest(EnumFacing.EAST);
@@ -357,7 +365,7 @@ public class TileEntityChest extends TileEntityLockableLoot implements ITickable
     @Override
     @Nullable
     public <T> T getCapability(net.minecraftforge.common.capabilities.Capability<T> capability,
-        @Nullable net.minecraft.util.EnumFacing facing) {
+                               @Nullable net.minecraft.util.EnumFacing facing) {
         if (capability == net.minecraftforge.items.CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
             if (doubleChestHandler == null || doubleChestHandler.needsRefresh())
                 doubleChestHandler = net.minecraftforge.items.VanillaDoubleChestItemHandler.get(this);

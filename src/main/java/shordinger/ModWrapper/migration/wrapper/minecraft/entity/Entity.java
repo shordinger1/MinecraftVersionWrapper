@@ -1,5 +1,6 @@
 package shordinger.ModWrapper.migration.wrapper.minecraft.entity;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -10,68 +11,10 @@ import java.util.UUID;
 
 import javax.annotation.Nullable;
 
-import net.minecraft.advancements.CriteriaTriggers;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockFence;
-import net.minecraft.block.BlockFenceGate;
-import net.minecraft.block.BlockWall;
-import net.minecraft.block.SoundType;
-import net.minecraft.block.material.EnumPushReaction;
-import net.minecraft.block.material.Material;
-import net.minecraft.block.state.IWrapperBlockState;
-import net.minecraft.block.state.pattern.BlockPattern;
-import net.minecraft.command.CommandResultStats;
-import net.minecraft.command.ICommandSender;
-import net.minecraft.crash.CrashReport;
-import net.minecraft.crash.CrashReportCategory;
-import net.minecraft.crash.ICrashReportDetail;
-import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.enchantment.EnchantmentProtection;
-import net.minecraft.entity.effect.EntityLightningBolt;
-import net.minecraft.entity.item.EntityBoat;
-import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.init.Blocks;
-import net.minecraft.init.SoundEvents;
-import net.minecraft.inventory.EntityEquipmentSlot;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagDouble;
-import net.minecraft.nbt.NBTTagFloat;
-import net.minecraft.nbt.NBTTagList;
-import net.minecraft.nbt.NBTTagString;
-import net.minecraft.network.datasync.DataParameter;
-import net.minecraft.network.datasync.DataSerializers;
-import net.minecraft.network.datasync.EntityDataManager;
-import net.minecraft.scoreboard.ScorePlayerTeam;
-import net.minecraft.scoreboard.Team;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.EnumActionResult;
-import net.minecraft.util.EnumBlockRenderType;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
-import net.minecraft.util.EnumParticleTypes;
-import net.minecraft.util.Mirror;
-import net.minecraft.util.ReportedException;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.Rotation;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.SoundEvent;
-import net.minecraft.util.datafix.DataFixer;
-import net.minecraft.util.datafix.FixTypes;
-import net.minecraft.util.datafix.IDataFixer;
-import net.minecraft.util.datafix.IDataWalker;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentString;
-import net.minecraft.util.text.event.HoverEvent;
-import net.minecraft.util.text.translation.I18n;
-import net.minecraft.world.Explosion;
-import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
 
+import net.minecraft.block.Block;
+import net.minecraft.entity.item.EntityItem;
+import net.minecraftforge.client.event.sound.SoundEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -81,114 +24,56 @@ import com.google.common.collect.Sets;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import shordinger.ModWrapper.migration.wrapper.minecraft.block.state.IBlockState;
+import shordinger.ModWrapper.migration.wrapper.minecraft.command.CommandResultStats;
+import shordinger.ModWrapper.migration.wrapper.minecraft.command.IWrapperCommandSender;
+import shordinger.ModWrapper.migration.wrapper.minecraft.item.TempItemStack;
+import shordinger.ModWrapper.migration.wrapper.minecraft.nbt.NBTTagCompound;
+import shordinger.ModWrapper.migration.wrapper.minecraft.network.datasync.DataParameter;
+import shordinger.ModWrapper.migration.wrapper.minecraft.network.datasync.DataSerializers;
+import shordinger.ModWrapper.migration.wrapper.minecraft.network.datasync.EntityDataManager;
+import shordinger.ModWrapper.migration.wrapper.minecraft.util.EnumFacing;
 import shordinger.ModWrapper.migration.wrapper.minecraft.util.math.AxisAlignedBB;
 import shordinger.ModWrapper.migration.wrapper.minecraft.util.math.BlockPos;
 import shordinger.ModWrapper.migration.wrapper.minecraft.util.math.MathHelper;
 import shordinger.ModWrapper.migration.wrapper.minecraft.util.math.RayTraceResult;
 import shordinger.ModWrapper.migration.wrapper.minecraft.util.math.Vec2f;
 import shordinger.ModWrapper.migration.wrapper.minecraft.util.math.Vec3d;
+import shordinger.ModWrapper.migration.wrapper.minecraft.util.text.ITextComponent;
+import shordinger.ModWrapper.migration.wrapper.minecraft.world.World;
+import shordinger.ModWrapper.migration.wrapper.minecraftforge.common.capabilities.CapabilityDispatcher;
+import shordinger.ModWrapper.migration.wrapper.minecraftforge.common.capabilities.ICapabilitySerializable;
 
-public abstract class Entity
-    implements ICommandSender, net.minecraftforge.common.capabilities.ICapabilitySerializable<NBTTagCompound> {
+public abstract class Entity extends net.minecraft.entity.Entity
+    implements IWrapperCommandSender, ICapabilitySerializable<NBTTagCompound> {
 
     private static final Logger LOGGER = LogManager.getLogger();
-    private static final List<ItemStack> EMPTY_EQUIPMENT = Collections.<ItemStack>emptyList();
+    private static final List<TempItemStack> EMPTY_EQUIPMENT = Collections.emptyList();
     private static final AxisAlignedBB ZERO_AABB = new AxisAlignedBB(0.0D, 0.0D, 0.0D, 0.0D, 0.0D, 0.0D);
     private static double renderDistanceWeight = 1.0D;
     private static int nextEntityID;
-    private int entityId;
+//    private int entityId;
     /**
-     * Blocks entities from spawning when they do their AABB check to make sure the spot is clear of entities that can
-     * prevent spawning.
+     * List of entities that are riding this entity
      */
-    public boolean preventEntitySpawning;
-    /** List of entities that are riding this entity */
     private final List<Entity> riddenByEntities;
     protected int rideCooldown;
     private Entity ridingEntity;
-    /**
-     * If true, forces the World to spawn the entity and send it to clients even if the Chunk it is located in has not
-     * yet been loaded.
-     */
-    public boolean forceSpawn;
-    /** Reference to the World object. */
-    public World world;
-    public double prevPosX;
-    public double prevPosY;
-    public double prevPosZ;
-    /** X position of this entity, located at the center of its bounding box. */
-    public double posX;
-    /** Y position of this entity, located at the bottom of its bounding box (its feet) */
-    public double posY;
-    /** Z position of this entity, located at the center of its bounding box. */
-    public double posZ;
-    /** Entity motion X */
-    public double motionX;
-    /** Entity motion Y */
-    public double motionY;
-    /** Entity motion Z */
-    public double motionZ;
-    /** Entity rotation Yaw */
-    public float rotationYaw;
-    /** Entity rotation Pitch */
-    public float rotationPitch;
-    public float prevRotationYaw;
-    public float prevRotationPitch;
-    /** Axis aligned bounding box. */
-    private AxisAlignedBB boundingBox;
-    public boolean onGround;
-    /** True if after a move this entity has collided with something on X- or Z-axis */
-    public boolean collidedHorizontally;
-    /** True if after a move this entity has collided with something on Y-axis */
-    public boolean collidedVertically;
-    /** True if after a move this entity has collided with something either vertically or horizontally */
-    public boolean collided;
-    /** If true, an {@link SPacketEntityVelocity} will be sent updating this entity's velocity. */
-    public boolean velocityChanged;
-    protected boolean isInWeb;
     private boolean isOutsideBorder;
-    /** gets set by setEntityDead, so this must be the flag whether an Entity is dead (inactive may be better term) */
-    public boolean isDead;
-    /** How wide this entity is considered to be */
-    public float width;
-    /** How high this entity is considered to be */
-    public float height;
-    /** The previous ticks distance walked multiplied by 0.6 */
-    public float prevDistanceWalkedModified;
-    /** The distance walked multiplied by 0.6 */
-    public float distanceWalkedModified;
-    public float distanceWalkedOnStepModified;
-    public float fallDistance;
-    /**
-     * The distance that has to be exceeded in order to triger a new step sound and an onEntityWalking event on a block
-     */
-    private int nextStepDistance;
+
     private float nextFlap;
-    /** The entity's X coordinate at the previous tick, used to calculate position during rendering routines */
-    public double lastTickPosX;
-    /** The entity's Y coordinate at the previous tick, used to calculate position during rendering routines */
-    public double lastTickPosY;
-    /** The entity's Z coordinate at the previous tick, used to calculate position during rendering routines */
-    public double lastTickPosZ;
+
     /**
      * How high this entity can step up when running into a block to try to get over it (currently make note the entity
      * will always step up this amount and not just the amount needed)
      */
     public float stepHeight;
-    /** Whether this entity won't clip with collision or not (make note it won't disable gravity) */
+    /**
+     * Whether this entity won't clip with collision or not (make note it won't disable gravity)
+     */
     public boolean noClip;
-    /** Reduces the velocity applied by entity collisions by the specified percent. */
-    public float entityCollisionReduction;
-    protected Random rand;
-    /** How many ticks has this entity had ran since being alive */
-    public int ticksExisted;
-    private int fire;
-    /** Whether this entity is currently inside of water (if it handles water movement that is) */
-    protected boolean inWater;
-    /** Remaining time an entity will be "immune" to further damage after being hurt. */
     public int hurtResistantTime;
-    protected boolean firstUpdate;
-    protected boolean isImmuneToFire;
+
     public EntityDataManager dataManager;
     protected static final DataParameter<Byte> FLAGS = EntityDataManager
         .<Byte>createKey(Entity.class, DataSerializers.BYTE);
@@ -202,7 +87,9 @@ public abstract class Entity
         .<Boolean>createKey(Entity.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> NO_GRAVITY = EntityDataManager
         .<Boolean>createKey(Entity.class, DataSerializers.BOOLEAN);
-    /** Has this entity been added to the chunk its within */
+    /**
+     * Has this entity been added to the chunk its within
+     */
     public boolean addedToChunk;
     public int chunkCoordX;
     public int chunkCoordY;
@@ -220,21 +107,33 @@ public abstract class Entity
     public boolean ignoreFrustumCheck;
     public boolean isAirBorne;
     public int timeUntilPortal;
-    /** Whether the entity is inside a Portal */
+    /**
+     * Whether the entity is inside a Portal
+     */
     public boolean inPortal;
     public int portalCounter;
-    /** Which dimension the player is in (-1 = the Nether, 0 = normal world) */
+    /**
+     * Which dimension the player is in (-1 = the Nether, 0 = normal world)
+     */
     public int dimension;
-    /** The position of the last portal the entity was in */
+    /**
+     * The position of the last portal the entity was in
+     */
     public BlockPos lastPortalPos;
-    /** A horizontal vector related to the position of the last portal the entity was in */
+    /**
+     * A horizontal vector related to the position of the last portal the entity was in
+     */
     protected Vec3d lastPortalVec;
-    /** A direction related to the position of the last portal the entity was in */
+    /**
+     * A direction related to the position of the last portal the entity was in
+     */
     protected EnumFacing teleportDirection;
     private boolean invulnerable;
     protected UUID entityUniqueID;
     protected String cachedUniqueIdString;
-    /** The command result statistics for this Entity. */
+    /**
+     * The command result statistics for this Entity.
+     */
     private final CommandResultStats cmdResultStats;
     protected boolean glowing;
     private final Set<String> tags;
@@ -246,28 +145,21 @@ public abstract class Entity
      */
     public boolean updateBlocked;
 
+    public World world;
+
     public Entity(World worldIn) {
-        this.entityId = nextEntityID++;
-        this.riddenByEntities = Lists.<Entity>newArrayList();
-        this.boundingBox = ZERO_AABB;
-        this.width = 0.6F;
-        this.height = 1.8F;
-        this.nextStepDistance = 1;
+        super(worldIn);
+        this.world = worldIn;
+        this.riddenByEntities = new ArrayList<>();
         this.nextFlap = 1.0F;
         this.rand = new Random();
-        this.fire = -this.getFireImmuneTicks();
-        this.firstUpdate = true;
-        this.entityUniqueID = MathHelper.getRandomUUID(this.rand);
+        this.setFire(-this.getFireImmuneTicks());
         this.cachedUniqueIdString = this.entityUniqueID.toString();
         this.cmdResultStats = new CommandResultStats();
         this.tags = Sets.<String>newHashSet();
-        this.pistonDeltas = new double[] { 0.0D, 0.0D, 0.0D };
-        this.world = worldIn;
-        this.setPosition(0.0D, 0.0D, 0.0D);
+        this.pistonDeltas = new double[]{0.0D, 0.0D, 0.0D};
 
-        if (worldIn != null) {
-            this.dimension = worldIn.provider.getDimension();
-        }
+        this.dimension = worldIn.provider.getDimension();
 
         this.dataManager = new EntityDataManager(this);
         this.dataManager.register(FLAGS, Byte.valueOf((byte) 0));
@@ -280,21 +172,17 @@ public abstract class Entity
         net.minecraftforge.common.MinecraftForge.EVENT_BUS
             .post(new net.minecraftforge.event.entity.EntityEvent.EntityConstructing(this));
         capabilities = net.minecraftforge.event.ForgeEventFactory.gatherCapabilities(this);
+        ICommand
     }
 
-    /** Forge: Used to store custom data for each entity. */
+    /**
+     * Forge: Used to store custom data for each entity.
+     */
     private NBTTagCompound customEntityData;
     public boolean captureDrops = false;
     public java.util.ArrayList<EntityItem> capturedDrops = new java.util.ArrayList<EntityItem>();
-    private net.minecraftforge.common.capabilities.CapabilityDispatcher capabilities;
+    private final CapabilityDispatcher capabilities;
 
-    public int getEntityId() {
-        return this.entityId;
-    }
-
-    public void setEntityId(int id) {
-        this.entityId = id;
-    }
 
     public Set<String> getTags() {
         return this.tags;
@@ -328,15 +216,12 @@ public abstract class Entity
 
     public boolean equals(Object p_equals_1_) {
         if (p_equals_1_ instanceof Entity) {
-            return ((Entity) p_equals_1_).entityId == this.entityId;
+            return ((Entity) p_equals_1_).getEntityId() == this.getEntityId();
         } else {
             return false;
         }
     }
 
-    public int hashCode() {
-        return this.entityId;
-    }
 
     /**
      * Keeps moving the entity up so it isn't colliding with blocks and other requirements for this entity to be spawned
@@ -373,7 +258,8 @@ public abstract class Entity
     /**
      * Sets whether this entity should drop its items when setDead() is called. This applies to container minecarts.
      */
-    public void setDropItemsWhenDead(boolean dropWhenDead) {}
+    public void setDropItemsWhenDead(boolean dropWhenDead) {
+    }
 
     /**
      * Sets the width and height of the entity.
@@ -428,13 +314,14 @@ public abstract class Entity
         this.posX = x;
         this.posY = y;
         this.posZ = z;
-        if (this.isAddedToWorld() && !this.world.isRemote) this.world.updateEntityWithOptionalForce(this, false); // Forge
-                                                                                                                  // -
-                                                                                                                  // Process
-                                                                                                                  // chunk
-                                                                                                                  // registration
-                                                                                                                  // after
-                                                                                                                  // moving.
+        if (this.isAddedToWorld() && !this.world.isRemote)
+            this.world.updateEntityWithOptionalForce(this, false); // Forge
+        // -
+        // Process
+        // chunk
+        // registration
+        // after
+        // moving.
         float f = this.width / 2.0F;
         float f1 = this.height;
         this.setEntityBoundingBox(
@@ -617,7 +504,7 @@ public abstract class Entity
      * Removes fire from entity.
      */
     public void extinguish() {
-        this.fire = 0;
+        this.setFire(0);
     }
 
     /**
@@ -719,9 +606,9 @@ public abstract class Entity
                 && this.isSneaking()
                 && this instanceof EntityPlayer) {
                 for (double d5 = 0.05D; x != 0.0D && this.world.getCollisionBoxes(
-                    this,
-                    this.getEntityBoundingBox()
-                        .offset(x, (double) (-this.stepHeight), 0.0D))
+                        this,
+                        this.getEntityBoundingBox()
+                            .offset(x, (double) (-this.stepHeight), 0.0D))
                     .isEmpty(); d2 = x) {
                     if (x < 0.05D && x >= -0.05D) {
                         x = 0.0D;
@@ -733,9 +620,9 @@ public abstract class Entity
                 }
 
                 for (; z != 0.0D && this.world.getCollisionBoxes(
-                    this,
-                    this.getEntityBoundingBox()
-                        .offset(0.0D, (double) (-this.stepHeight), z))
+                        this,
+                        this.getEntityBoundingBox()
+                            .offset(0.0D, (double) (-this.stepHeight), z))
                     .isEmpty(); d4 = z) {
                     if (z < 0.05D && z >= -0.05D) {
                         z = 0.0D;
@@ -751,7 +638,7 @@ public abstract class Entity
                         this,
                         this.getEntityBoundingBox()
                             .offset(x, (double) (-this.stepHeight), z))
-                        .isEmpty(); d4 = z) {
+                    .isEmpty(); d4 = z) {
                     if (x < 0.05D && x >= -0.05D) {
                         x = 0.0D;
                     } else if (x > 0.0D) {
@@ -926,11 +813,11 @@ public abstract class Entity
             int i1 = MathHelper.floor(this.posY - 0.20000000298023224D);
             int k6 = MathHelper.floor(this.posZ);
             BlockPos blockpos = new BlockPos(j6, i1, k6);
-            IWrapperBlockState iblockstate = this.world.getBlockState(blockpos);
+            IBlockState iblockstate = this.world.getBlockState(blockpos);
 
             if (iblockstate.getMaterial() == Material.AIR) {
                 BlockPos blockpos1 = blockpos.down();
-                IWrapperBlockState iblockstate1 = this.world.getBlockState(blockpos1);
+                IBlockState iblockstate1 = this.world.getBlockState(blockpos1);
                 Block block1 = iblockstate1.getBlock();
 
                 if (block1 instanceof BlockFence || block1 instanceof BlockWall || block1 instanceof BlockFenceGate) {
@@ -1001,8 +888,8 @@ public abstract class Entity
                     }
                 } else if (this.distanceWalkedOnStepModified > this.nextFlap && this.makeFlySound()
                     && iblockstate.getMaterial() == Material.AIR) {
-                        this.nextFlap = this.playFlySound(this.distanceWalkedOnStepModified);
-                    }
+                    this.nextFlap = this.playFlySound(this.distanceWalkedOnStepModified);
+                }
             }
 
             try {
@@ -1053,13 +940,14 @@ public abstract class Entity
         this.posX = (axisalignedbb.minX + axisalignedbb.maxX) / 2.0D;
         this.posY = axisalignedbb.minY;
         this.posZ = (axisalignedbb.minZ + axisalignedbb.maxZ) / 2.0D;
-        if (this.isAddedToWorld() && !this.world.isRemote) this.world.updateEntityWithOptionalForce(this, false); // Forge
-                                                                                                                  // -
-                                                                                                                  // Process
-                                                                                                                  // chunk
-                                                                                                                  // registration
-                                                                                                                  // after
-                                                                                                                  // moving.
+        if (this.isAddedToWorld() && !this.world.isRemote)
+            this.world.updateEntityWithOptionalForce(this, false); // Forge
+        // -
+        // Process
+        // chunk
+        // registration
+        // after
+        // moving.
     }
 
     protected SoundEvent getSwimSound() {
@@ -1084,7 +972,7 @@ public abstract class Entity
                     for (int k = blockpos$pooledmutableblockpos.getZ(); k
                         <= blockpos$pooledmutableblockpos1.getZ(); ++k) {
                         blockpos$pooledmutableblockpos2.setPos(i, j, k);
-                        IWrapperBlockState iblockstate = this.world.getBlockState(blockpos$pooledmutableblockpos2);
+                        IBlockState iblockstate = this.world.getBlockState(blockpos$pooledmutableblockpos2);
 
                         try {
                             iblockstate.getBlock()
@@ -1113,10 +1001,11 @@ public abstract class Entity
         blockpos$pooledmutableblockpos2.release();
     }
 
-    protected void onInsideBlock(IWrapperBlockState p_191955_1_) {}
+    protected void onInsideBlock(IBlockState p_191955_1_) {
+    }
 
     protected void playStepSound(BlockPos pos, Block blockIn) {
-        SoundType soundtype = blockIn.getSoundType(world.getBlockState(pos), world, pos, this);
+        Block.SoundType soundtype = blockIn.getSoundType(world.getBlockState(pos), world, pos, this);
 
         if (this.world.getBlockState(pos.up())
             .getBlock() == Blocks.SNOW_LAYER) {
@@ -1125,8 +1014,8 @@ public abstract class Entity
         } else if (!blockIn.getDefaultState()
             .getMaterial()
             .isLiquid()) {
-                this.playSound(soundtype.getStepSound(), soundtype.getVolume() * 0.15F, soundtype.getPitch());
-            }
+            this.playSound(soundtype.getStepSound(), soundtype.getVolume() * 0.15F, soundtype.getPitch());
+        }
     }
 
     protected float playFlySound(float p_191954_1_) {
@@ -1181,7 +1070,7 @@ public abstract class Entity
         return true;
     }
 
-    protected void updateFallState(double y, boolean onGroundIn, IWrapperBlockState state, BlockPos pos) {
+    protected void updateFallState(double y, boolean onGroundIn, IBlockState state, BlockPos pos) {
         if (onGroundIn) {
             if (this.fallDistance > 0.0F) {
                 state.getBlock()
@@ -1197,7 +1086,7 @@ public abstract class Entity
     /**
      * Returns the <b>solid</b> collision bounding box for this entity. Used to make (e.g.) boats solid. Return null if
      * this entity is not solid.
-     *
+     * <p>
      * For general purposes, use {@link #width} and {@link #height}.
      *
      * @see getEntityBoundingBox
@@ -1278,16 +1167,16 @@ public abstract class Entity
                 .shrink(0.001D),
             Material.WATER,
             this)) {
-                if (!this.inWater && !this.firstUpdate) {
-                    this.doWaterSplashEffect();
-                }
-
-                this.fallDistance = 0.0F;
-                this.inWater = true;
-                this.extinguish();
-            } else {
-                this.inWater = false;
+            if (!this.inWater && !this.firstUpdate) {
+                this.doWaterSplashEffect();
             }
+
+            this.fallDistance = 0.0F;
+            this.inWater = true;
+            this.extinguish();
+        } else {
+            this.inWater = false;
+        }
 
         return this.inWater;
     }
@@ -1353,7 +1242,7 @@ public abstract class Entity
         int j = MathHelper.floor(this.posY - 0.20000000298023224D);
         int k = MathHelper.floor(this.posZ);
         BlockPos blockpos = new BlockPos(i, j, k);
-        IWrapperBlockState iblockstate = this.world.getBlockState(blockpos);
+        IBlockState iblockstate = this.world.getBlockState(blockpos);
 
         if (!iblockstate.getBlock()
             .addRunningEffects(iblockstate, world, blockpos, this))
@@ -1379,7 +1268,7 @@ public abstract class Entity
         } else {
             double d0 = this.posY + (double) this.getEyeHeight();
             BlockPos blockpos = new BlockPos(this.posX, d0, this.posZ);
-            IWrapperBlockState iblockstate = this.world.getBlockState(blockpos);
+            IBlockState iblockstate = this.world.getBlockState(blockpos);
 
             Boolean result = iblockstate.getBlock()
                 .isEntityInsideMaterial(this.world, blockpos, iblockstate, this, d0, materialIn, true);
@@ -1458,6 +1347,7 @@ public abstract class Entity
      * Sets the reference to the World object.
      */
     public void setWorld(World worldIn) {
+        this.worldObj = worldIn;
         this.world = worldIn;
     }
 
@@ -1488,12 +1378,12 @@ public abstract class Entity
 
         if (!this.world.isRemote)
             this.world.getChunkFromChunkCoords((int) Math.floor(this.posX) >> 4, (int) Math.floor(this.posZ) >> 4); // Forge
-                                                                                                                    // -
-                                                                                                                    // ensure
-                                                                                                                    // target
-                                                                                                                    // chunk
-                                                                                                                    // is
-                                                                                                                    // loaded.
+        // -
+        // ensure
+        // target
+        // chunk
+        // is
+        // loaded.
         this.setPosition(this.posX, this.posY, this.posZ);
         this.setRotation(yaw, pitch);
     }
@@ -1576,7 +1466,8 @@ public abstract class Entity
     /**
      * Called by a player entity when they collide with an entity
      */
-    public void onCollideWithPlayer(EntityPlayer entityIn) {}
+    public void onCollideWithPlayer(EntityPlayer entityIn) {
+    }
 
     /**
      * Applies a velocity to the entities, to push them away from eachother.
@@ -1740,7 +1631,7 @@ public abstract class Entity
     /**
      * Attempts to write this Entity to the given NBTTagCompound. Returns false if the entity is dead or its string
      * representation is null. In this event, the given NBTTagCompound is not modified.
-     *
+     * <p>
      * Similar to writeToNBTOptional, but does not check whether this Entity is a passenger of another.
      */
     public boolean writeToNBTAtomically(NBTTagCompound compound) {
@@ -2125,7 +2016,8 @@ public abstract class Entity
      * Applies this entity's orientation (pitch/yaw) to another entity. Used to update passenger orientation.
      */
     @SideOnly(Side.CLIENT)
-    public void applyOrientationToEntity(Entity entityToUpdate) {}
+    public void applyOrientationToEntity(Entity entityToUpdate) {
+    }
 
     /**
      * Returns the Y Offset of this entity.
@@ -2223,7 +2115,7 @@ public abstract class Entity
      */
     @SideOnly(Side.CLIENT)
     public void setPositionAndRotationDirect(double x, double y, double z, float yaw, float pitch,
-        int posRotationIncrements, boolean teleport) {
+                                             int posRotationIncrements, boolean teleport) {
         this.setPosition(x, y, z);
         this.setRotation(yaw, pitch);
     }
@@ -2266,10 +2158,10 @@ public abstract class Entity
                     .createPatternHelper(this.world, this.lastPortalPos);
                 double d0 = blockpattern$patternhelper.getForwards()
                     .getAxis() == EnumFacing.Axis.X
-                        ? (double) blockpattern$patternhelper.getFrontTopLeft()
-                            .getZ()
-                        : (double) blockpattern$patternhelper.getFrontTopLeft()
-                            .getX();
+                    ? (double) blockpattern$patternhelper.getFrontTopLeft()
+                    .getZ()
+                    : (double) blockpattern$patternhelper.getFrontTopLeft()
+                    .getX();
                 double d1 = blockpattern$patternhelper.getForwards()
                     .getAxis() == EnumFacing.Axis.X ? this.posZ : this.posX;
                 d1 = Math.abs(
@@ -2314,13 +2206,15 @@ public abstract class Entity
      * Handler for {@link World#setEntityState}
      */
     @SideOnly(Side.CLIENT)
-    public void handleStatusUpdate(byte id) {}
+    public void handleStatusUpdate(byte id) {
+    }
 
     /**
      * Setups the entity to do the hurt animation. Only used by packets in multiplayer.
      */
     @SideOnly(Side.CLIENT)
-    public void performHurtAnimation() {}
+    public void performHurtAnimation() {
+    }
 
     public Iterable<ItemStack> getHeldEquipment() {
         return EMPTY_EQUIPMENT;
@@ -2334,7 +2228,8 @@ public abstract class Entity
         return Iterables.<ItemStack>concat(this.getHeldEquipment(), this.getArmorInventoryList());
     }
 
-    public void setItemStackToSlot(EntityEquipmentSlot slotIn, ItemStack stack) {}
+    public void setItemStackToSlot(EntityEquipmentSlot slotIn, ItemStack stack) {
+    }
 
     /**
      * Returns true if the entity is on fire. Used by render to add the fire effect on rendering.
@@ -2486,7 +2381,8 @@ public abstract class Entity
     /**
      * This method gets called when the entity kills another one.
      */
-    public void onKillEntity(EntityLivingBase entityLivingIn) {}
+    public void onKillEntity(EntityLivingBase entityLivingIn) {
+    }
 
     protected boolean pushOutOfBlocks(double x, double y, double z) {
         BlockPos blockpos = new BlockPos(x, y, z);
@@ -2597,12 +2493,14 @@ public abstract class Entity
     /**
      * Sets the head's yaw rotation of the entity.
      */
-    public void setRotationYawHead(float rotation) {}
+    public void setRotationYawHead(float rotation) {
+    }
 
     /**
      * Set the render yaw offset
      */
-    public void setRenderYawOffset(float offset) {}
+    public void setRenderYawOffset(float offset) {
+    }
 
     /**
      * Returns true if it's possible to attack this entity with an item.
@@ -2627,7 +2525,7 @@ public abstract class Entity
             this.entityId,
             this.world == null ? "~NULL~"
                 : this.world.getWorldInfo()
-                    .getWorldName(),
+                .getWorldName(),
             this.posX,
             this.posY,
             this.posZ);
@@ -2805,13 +2703,13 @@ public abstract class Entity
      * Explosion resistance of a block relative to this entity
      */
     public float getExplosionResistance(Explosion explosionIn, World worldIn, BlockPos pos,
-        IWrapperBlockState blockStateIn) {
+                                        IBlockState blockStateIn) {
         return blockStateIn.getBlock()
             .getExplosionResistance(worldIn, pos, this, explosionIn);
     }
 
     public boolean canExplosionDestroyBlock(Explosion explosionIn, World worldIn, BlockPos pos,
-        IWrapperBlockState blockStateIn, float p_174816_5_) {
+                                            IBlockState blockStateIn, float p_174816_5_) {
         return true;
     }
 
@@ -2843,7 +2741,7 @@ public abstract class Entity
             public String call() throws Exception {
                 return EntityList.getKey(Entity.this) + " ("
                     + Entity.this.getClass()
-                        .getCanonicalName()
+                    .getCanonicalName()
                     + ")";
             }
         });
@@ -2971,7 +2869,8 @@ public abstract class Entity
         this.world.updateEntityWithOptionalForce(this, false);
     }
 
-    public void notifyDataManagerChange(DataParameter<?> key) {}
+    public void notifyDataManagerChange(DataParameter<?> key) {
+    }
 
     @SideOnly(Side.CLIENT)
     public boolean getAlwaysRenderNameTagForRender() {
@@ -3011,7 +2910,7 @@ public abstract class Entity
     }
 
     public AxisAlignedBB getEntityBoundingBox() {
-        return this.boundingBox;
+        return (AxisAlignedBB) this.boundingBox;
     }
 
     /**
@@ -3039,14 +2938,15 @@ public abstract class Entity
         this.isOutsideBorder = outsideBorder;
     }
 
-    public boolean replaceItemInInventory(int inventorySlot, ItemStack itemStackIn) {
+    public boolean replaceItemInInventory(int inventorySlot, TempItemStack itemStackIn) {
         return false;
     }
 
     /**
      * Send a chat message to the CommandSender
      */
-    public void sendMessage(ITextComponent component) {}
+    public void sendMessage(ITextComponent component) {
+    }
 
     /**
      * Returns {@code true} if the CommandSender is allowed to execute the command, {@code false} if not
@@ -3178,7 +3078,7 @@ public abstract class Entity
     /**
      * Returns a NBTTagCompound that can be used to store custom data for this entity.
      * It will be written, and read from disc, so it persists over world saves.
-     * 
+     *
      * @return A NBTTagCompound
      */
     public NBTTagCompound getEntityData() {
@@ -3190,7 +3090,7 @@ public abstract class Entity
 
     /**
      * Used in model rendering to determine if the entity riding this entity should be in the 'sitting' position.
-     * 
+     *
      * @return false to prevent an entity that is mounted to this entity from displaying the 'sitting' animation.
      */
     public boolean shouldRiderSit() {
@@ -3252,7 +3152,7 @@ public abstract class Entity
 
     /**
      * Returns true if the entity is of the @link{EnumCreatureType} provided
-     * 
+     *
      * @param type          The EnumCreatureType type this entity is evaluating
      * @param forSpawnCount If this is being invoked to check spawn count caps.
      * @return If the creature is of the type provided
@@ -3286,14 +3186,14 @@ public abstract class Entity
 
     @Override
     public boolean hasCapability(net.minecraftforge.common.capabilities.Capability<?> capability,
-        @Nullable net.minecraft.util.EnumFacing facing) {
+                                 @Nullable net.minecraft.util.EnumFacing facing) {
         return capabilities != null && capabilities.hasCapability(capability, facing);
     }
 
     @Override
     @Nullable
     public <T> T getCapability(net.minecraftforge.common.capabilities.Capability<T> capability,
-        @Nullable net.minecraft.util.EnumFacing facing) {
+                               @Nullable net.minecraft.util.EnumFacing facing) {
         return capabilities == null ? null : capabilities.getCapability(capability, facing);
     }
 
@@ -3319,7 +3219,7 @@ public abstract class Entity
     public boolean canTrample(World world, Block block, BlockPos pos, float fallDistance) {
         return world.rand.nextFloat() < fallDistance - 0.5F && this instanceof EntityLivingBase
             && (this instanceof EntityPlayer
-                || net.minecraftforge.event.ForgeEventFactory.getMobGriefingEvent(world, this))
+            || net.minecraftforge.event.ForgeEventFactory.getMobGriefingEvent(world, this))
             && this.width * this.width * this.height > 0.512F;
     }
     /* ================================== Forge End ===================================== */
@@ -3328,13 +3228,15 @@ public abstract class Entity
      * Add the given player to the list of players tracking this entity. For instance, a player may track a boss in
      * order to view its associated boss bar.
      */
-    public void addTrackingPlayer(EntityPlayerMP player) {}
+    public void addTrackingPlayer(EntityPlayerMP player) {
+    }
 
     /**
      * Removes the given player from the list of players tracking this entity. See {@link Entity#addTrackingPlayer} for
      * more information on tracking.
      */
-    public void removeTrackingPlayer(EntityPlayerMP player) {}
+    public void removeTrackingPlayer(EntityPlayerMP player) {
+    }
 
     /**
      * Transforms the entity's current yaw with the given Rotation and returns it. This does not have a side-effect.

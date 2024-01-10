@@ -22,11 +22,11 @@ public class NBTTagString extends NBTBase {
     /**
      * Write the actual data contents of the tag, implemented in NBT extension classes
      */
-    void write(DataOutput output) throws IOException {
+    public void write(DataOutput output) throws IOException {
         output.writeUTF(this.data);
     }
 
-    void read(DataInput input, int depth, NBTSizeTracker sizeTracker) throws IOException {
+    public void read(DataInput input, int depth, NBTSizeTracker sizeTracker) throws IOException {
         sizeTracker.read(288L);
         this.data = input.readUTF();
         NBTSizeTracker.readUTF(sizeTracker, data); // Forge: Correctly read String length including header.

@@ -117,7 +117,7 @@ public class EmptyWrapperChunk extends WrapperChunk {
      * Fills the given list of all entities that intersect within the given bounding box that aren't the passed entity.
      */
     public void getEntitiesWithinAABBForEntity(@Nullable Entity entityIn, AxisAlignedBB aabb, List<Entity> listToFill,
-        Predicate<? super Entity> filter) {}
+                                               Predicate<? super Entity> filter) {}
 
     /**
      * Gets all entities that can be assigned to the specified class.

@@ -52,7 +52,7 @@ public class FarmlandWaterManager {
      * If you don't want to water the region anymore, call {@link SimpleTicket#invalidate()}. Also call this
      * when the region this is unloaded (e.g. your TE is unloaded or the block is removed), and validate once it is
      * loaded
-     * 
+     *
      * @param world            The world where the region should be marked. Only server-side worlds are allowed
      * @param ticket           Your ticket you want to have registered
      * @param masterChunk      The chunk pos that is controls when the ticket may be unloaded. The ticket should
@@ -84,7 +84,7 @@ public class FarmlandWaterManager {
      * loaded
      * <br>
      * The AABB in the ticket is immutable
-     * 
+     *
      * @param world The world where the region should be marked. Only server-side worlds are allowed
      * @param aabb  The region where blocks should be watered
      * @return The ticket for your requested region.
@@ -143,7 +143,7 @@ public class FarmlandWaterManager {
     /**
      * Tests if a block is in a region that is watered by blocks. This does not check vanilla water, see
      * {@link net.minecraft.block.BlockFarmland#hasWater(World, BlockPos)}
-     * 
+     *
      * @return true if there is a ticket with an AABB that includes your block
      */
     public static boolean hasBlockWaterTicket(World world, BlockPos pos) {

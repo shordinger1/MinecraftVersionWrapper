@@ -28,14 +28,14 @@ public class CommandEntityData extends CommandBase {
     /**
      * Gets the usage string for the command.
      */
-    public String getUsage(ICommandSender sender) {
+    public String getUsage(IWrapperCommandSender sender) {
         return "commands.entitydata.usage";
     }
 
     /**
      * Callback for when the command is executed
      */
-    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
+    public void execute(MinecraftServer server, IWrapperCommandSender sender, String[] args) throws CommandException {
         if (args.length < 2) {
             throw new WrongUsageException("commands.entitydata.usage", new Object[0]);
         } else {

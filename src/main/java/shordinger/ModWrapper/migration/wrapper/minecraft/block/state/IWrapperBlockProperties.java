@@ -4,20 +4,17 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-import net.minecraft.block.material.MapColor;
-import net.minecraft.block.material.Material;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.world.World;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import shordinger.ModWrapper.migration.wrapper.minecraft.block.material.EnumPushReaction;
+import shordinger.ModWrapper.migration.wrapper.minecraft.block.material.MapColor;
+import shordinger.ModWrapper.migration.wrapper.minecraft.block.material.Material;
+import shordinger.ModWrapper.migration.wrapper.minecraft.entity.Entity;
 import shordinger.ModWrapper.migration.wrapper.minecraft.util.EnumBlockRenderType;
 import shordinger.ModWrapper.migration.wrapper.minecraft.util.Mirror;
-import shordinger.ModWrapper.migration.wrapper.minecraft.util.WrapperRotation;
+import shordinger.ModWrapper.migration.wrapper.minecraft.util.Rotation;
+import shordinger.ModWrapper.migration.wrapper.minecraft.util.math.AxisAlignedBB;
 import shordinger.ModWrapper.migration.wrapper.minecraft.util.math.BlockPos;
 import shordinger.ModWrapper.migration.wrapper.minecraft.util.math.RayTraceResult;
 import shordinger.ModWrapper.migration.wrapper.minecraft.util.math.Vec3d;
@@ -53,12 +50,12 @@ public interface IWrapperBlockProperties {
     /**
      * Returns the blockstate with the given rotation. If inapplicable, returns itself.
      */
-    IWrapperBlockState withRotation(WrapperRotation rot);
+    IBlockState withRotation(Rotation rot);
 
     /**
      * Returns the blockstate mirrored in the given way. If inapplicable, returns itself.
      */
-    IWrapperBlockState withMirror(Mirror mirrorIn);
+    IBlockState withMirror(Mirror mirrorIn);
 
     boolean isFullCube();
 
@@ -93,7 +90,7 @@ public interface IWrapperBlockProperties {
 
     EnumPushReaction getMobilityFlag();
 
-    IWrapperBlockState getActualState(IWrapperBlockAccess blockAccess, BlockPos pos);
+    IBlockState getActualState(IWrapperBlockAccess blockAccess, BlockPos pos);
 
     @SideOnly(Side.CLIENT)
     AxisAlignedBB getSelectedBoundingBox(World worldIn, BlockPos pos);

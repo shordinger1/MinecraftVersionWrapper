@@ -14,7 +14,7 @@ public class BlockWorldState {
     private final World world;
     private final BlockPos pos;
     private final boolean forceLoad;
-    private IWrapperBlockState state;
+    private IBlockState state;
     private TileEntity tileEntity;
     private boolean tileEntityInitialized;
 
@@ -28,7 +28,7 @@ public class BlockWorldState {
      * Gets the block state as currently held, or (if it has not gotten it from the world) loads it from the world.
      * This will only look up the state from the world if {@link #forceLoad} is true or the block position is loaded.
      */
-    public IWrapperBlockState getBlockState() {
+    public IBlockState getBlockState() {
         if (this.state == null && (this.forceLoad || this.world.isBlockLoaded(this.pos))) {
             this.state = this.world.getBlockState(this.pos);
         }
@@ -54,9 +54,9 @@ public class BlockWorldState {
     }
 
     /**
-     * Creates a new {@link Predicate} that will match when the given {@link IWrapperBlockState} predicate matches.
+     * Creates a new {@link Predicate} that will match when the given {@link IBlockState} predicate matches.
      */
-    public static Predicate<BlockWorldState> hasState(final Predicate<IWrapperBlockState> predicatesIn) {
+    public static Predicate<BlockWorldState> hasState(final Predicate<IBlockState> predicatesIn) {
         return new Predicate<BlockWorldState>() {
 
             public boolean apply(@Nullable BlockWorldState p_apply_1_) {

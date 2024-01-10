@@ -5,10 +5,6 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-import net.minecraft.advancements.Advancement;
-import net.minecraft.advancements.AdvancementProgress;
-import net.minecraft.advancements.CriterionProgress;
-import net.minecraft.advancements.PlayerAdvancements;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ResourceLocation;
@@ -36,14 +32,14 @@ public class AdvancementCommand extends CommandBase {
     /**
      * Gets the usage string for the command.
      */
-    public String getUsage(ICommandSender sender) {
+    public String getUsage(IWrapperCommandSender sender) {
         return "commands.advancement.usage";
     }
 
     /**
      * Callback for when the command is executed
      */
-    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
+    public void execute(MinecraftServer server, IWrapperCommandSender sender, String[] args) throws CommandException {
         if (args.length < 1) {
             throw new WrongUsageException("commands.advancement.usage", new Object[0]);
         } else {
@@ -90,8 +86,8 @@ public class AdvancementCommand extends CommandBase {
         }
     }
 
-    private void perform(MinecraftServer server, ICommandSender sender, String[] args, EntityPlayerMP player,
-        AdvancementCommand.ActionType p_193516_5_, AdvancementCommand.Mode p_193516_6_) throws CommandException {
+    private void perform(MinecraftServer server, IWrapperCommandSender sender, String[] args, EntityPlayerMP player,
+                         AdvancementCommand.ActionType p_193516_5_, AdvancementCommand.Mode p_193516_6_) throws CommandException {
         if (p_193516_6_ == AdvancementCommand.Mode.EVERYTHING) {
             if (args.length == 3) {
                 int j = p_193516_5_.perform(
@@ -177,8 +173,8 @@ public class AdvancementCommand extends CommandBase {
         return list;
     }
 
-    private void testCriterion(ICommandSender p_192554_1_, EntityPlayerMP p_192554_2_, Advancement p_192554_3_,
-        String p_192554_4_) throws CommandException {
+    private void testCriterion(IWrapperCommandSender p_192554_1_, EntityPlayerMP p_192554_2_, Advancement p_192554_3_,
+                               String p_192554_4_) throws CommandException {
         PlayerAdvancements playeradvancements = p_192554_2_.getAdvancements();
         CriterionProgress criterionprogress = playeradvancements.getProgress(p_192554_3_)
             .getCriterionProgress(p_192554_4_);
@@ -200,7 +196,7 @@ public class AdvancementCommand extends CommandBase {
         }
     }
 
-    private void testAdvancement(ICommandSender p_192552_1_, EntityPlayerMP p_192552_2_, Advancement p_192552_3_)
+    private void testAdvancement(IWrapperCommandSender p_192552_1_, EntityPlayerMP p_192552_2_, Advancement p_192552_3_)
         throws CommandException {
         AdvancementProgress advancementprogress = p_192552_2_.getAdvancements()
             .getProgress(p_192552_3_);
@@ -221,8 +217,8 @@ public class AdvancementCommand extends CommandBase {
     /**
      * Get a list of options for when the user presses the TAB key
      */
-    public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args,
-        @Nullable BlockPos targetPos) {
+    public List<String> getTabCompletions(MinecraftServer server, IWrapperCommandSender sender, String[] args,
+                                          @Nullable BlockPos targetPos) {
         if (args.length == 1) {
             return getListOfStringsMatchingLastWord(args, new String[] { "grant", "revoke", "test" });
         } else {
@@ -433,8 +429,8 @@ public class AdvancementCommand extends CommandBase {
             return new CommandException(p_193544_1_.baseTranslationKey + "." + this.name + ".usage", new Object[0]);
         }
 
-        void success(ICommandSender sender, AdvancementCommand p_193546_2_, AdvancementCommand.ActionType type,
-            Object... args) {
+        void success(IWrapperCommandSender sender, AdvancementCommand p_193546_2_, AdvancementCommand.ActionType type,
+                     Object... args) {
             CommandBase.notifyCommandListener(
                 sender,
                 p_193546_2_,

@@ -39,7 +39,7 @@ public class BlockPistonStructureHelper {
     public boolean canMove() {
         this.toMove.clear();
         this.toDestroy.clear();
-        IWrapperBlockState iblockstate = this.world.getBlockState(this.blockToMove);
+        IBlockState iblockstate = this.world.getBlockState(this.blockToMove);
 
         if (!BlockPistonBase
             .canPush(iblockstate, this.world, this.blockToMove, this.moveDirection, false, this.moveDirection)) {
@@ -67,7 +67,7 @@ public class BlockPistonStructureHelper {
     }
 
     private boolean addBlockLine(BlockPos origin, EnumFacing p_177251_2_) {
-        IWrapperBlockState iblockstate = this.world.getBlockState(origin);
+        IBlockState iblockstate = this.world.getBlockState(origin);
         Block block = iblockstate.getBlock();
 
         if (iblockstate.getBlock()

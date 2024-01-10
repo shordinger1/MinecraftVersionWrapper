@@ -115,8 +115,8 @@ public class ServerCommandManager extends CommandHandler implements ICommandList
     /**
      * Send an informative message to the server operators
      */
-    public void notifyListener(ICommandSender sender, ICommand command, int flags, String translationKey,
-        Object... translationArgs) {
+    public void notifyListener(IWrapperCommandSender sender, ICommand command, int flags, String translationKey,
+                               Object... translationArgs) {
         boolean flag = true;
         MinecraftServer minecraftserver = this.server;
 

@@ -7,6 +7,7 @@ import java.util.Map.Entry;
 import javax.annotation.Nullable;
 
 import net.minecraft.util.EnumTypeAdapterFactory;
+import net.minecraft.util.IChatComponent;
 import net.minecraft.util.JsonUtils;
 
 import com.google.gson.Gson;
@@ -21,7 +22,7 @@ import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 
-public interface ITextComponent extends Iterable<ITextComponent> {
+public interface ITextComponent extends IChatComponent {
 
     /**
      * Sets the style of this component and updates the parent style of all of the sibling components.

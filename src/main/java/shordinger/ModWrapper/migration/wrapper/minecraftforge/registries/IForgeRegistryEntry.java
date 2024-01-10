@@ -70,7 +70,7 @@ public interface IForgeRegistryEntry<V> {
                     + " Old: "
                     + getRegistryName());
 
-            this.registryName = GameData.checkPrefix(name, true);
+            this.registryName = WrapperGameData.checkPrefix(name, true);
             return (T) this;
         }
 

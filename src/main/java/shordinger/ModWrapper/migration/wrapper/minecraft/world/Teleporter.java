@@ -19,14 +19,14 @@ import shordinger.ModWrapper.migration.wrapper.minecraft.util.math.MathHelper;
 
 public class Teleporter implements net.minecraftforge.common.util.ITeleporter {
 
-    protected final WrapperWorldServer world;
+    protected final WorldServer world;
     /** A private Random() function in Teleporter */
     protected final Random random;
     /** Stores successful portal placement locations for rapid lookup. */
     protected final Long2ObjectMap<Teleporter.PortalPosition> destinationCoordinateCache = new Long2ObjectOpenHashMap<Teleporter.PortalPosition>(
         4096);
 
-    public Teleporter(WrapperWorldServer worldIn) {
+    public Teleporter(WorldServer worldIn) {
         this.world = worldIn;
         this.random = new Random(worldIn.getSeed());
     }
@@ -423,7 +423,7 @@ public class Teleporter implements net.minecraftforge.common.util.ITeleporter {
     }
 
     @Override
-    public void placeEntity(WrapperWorld wrapperWorld, Entity entity, float yaw) {
+    public void placeEntity(World world, Entity entity, float yaw) {
         if (entity instanceof EntityPlayerMP) placeInPortal(entity, yaw);
         else placeInExistingPortal(entity, yaw);
     }

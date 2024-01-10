@@ -7,7 +7,7 @@ import javax.annotation.concurrent.Immutable;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.Rotation;
+
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -17,12 +17,15 @@ import com.google.common.collect.Lists;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import shordinger.ModWrapper.migration.wrapper.minecraft.util.Rotation;
 
 @Immutable
 public class BlockPos extends Vec3i {
 
     private static final Logger LOGGER = LogManager.getLogger();
-    /** An immutable block pos with zero as all coordinates. */
+    /**
+     * An immutable block pos with zero as all coordinates.
+     */
     public static final BlockPos ORIGIN = new BlockPos(0, 0, 0);
     private static final int NUM_X_BITS = 1 + MathHelper.log2(MathHelper.smallestEncompassingPowerOfTwo(30000000));
     private static final int NUM_Z_BITS = NUM_X_BITS;
@@ -179,23 +182,18 @@ public class BlockPos extends Vec3i {
     public BlockPos offset(EnumFacing facing, int n) {
         return n == 0 ? this
             : new BlockPos(
-                this.getX() + facing.getFrontOffsetX() * n,
-                this.getY() + facing.getFrontOffsetY() * n,
-                this.getZ() + facing.getFrontOffsetZ() * n);
+            this.getX() + facing.getFrontOffsetX() * n,
+            this.getY() + facing.getFrontOffsetY() * n,
+            this.getZ() + facing.getFrontOffsetZ() * n);
     }
 
     public BlockPos rotate(Rotation rotationIn) {
-        switch (rotationIn) {
-            case NONE:
-            default:
-                return this;
-            case CLOCKWISE_90:
-                return new BlockPos(-this.getZ(), this.getY(), this.getX());
-            case CLOCKWISE_180:
-                return new BlockPos(-this.getX(), this.getY(), -this.getZ());
-            case COUNTERCLOCKWISE_90:
-                return new BlockPos(this.getZ(), this.getY(), -this.getX());
-        }
+        return switch (rotationIn) {
+            default -> this;
+            case CLOCKWISE_90 -> new BlockPos(-this.getZ(), this.getY(), this.getX());
+            case CLOCKWISE_180 -> new BlockPos(-this.getX(), this.getY(), -this.getZ());
+            case COUNTERCLOCKWISE_90 -> new BlockPos(this.getZ(), this.getY(), -this.getX());
+        };
     }
 
     /**
@@ -229,16 +227,15 @@ public class BlockPos extends Vec3i {
     /**
      * Create an Iterable that returns all positions in the box specified by the given corners. There is no requirement
      * that one corner is greater than the other; individual coordinates will be swapped as needed.
-     *
+     * <p>
      * In situations where it is usable, prefer {@link #getAllInBoxMutable(BlockPos, BlockPos}) instead as it has better
      * performance (fewer allocations)
      *
+     * @param from One corner of the box
+     * @param to   Another corner of the box
      * @see #getAllInBox(int, int, int, int, int, int)
      * @see #getAllInBoxMutable(BlockPos, BlockPos)
      * @see #mutablesBetween(int, int, int, int, int, int)
-     *
-     * @param from One corner of the box
-     * @param to   Another corner of the box
      */
     public static Iterable<BlockPos> getAllInBox(BlockPos from, BlockPos to) {
         return getAllInBox(
@@ -253,13 +250,9 @@ public class BlockPos extends Vec3i {
     /**
      * Create an Iterable that returns all positions in the box specified by the coordinates. <strong>Coordinates must
      * be in order</strong>; e.g. x1 <= x2.
-     *
+     * <p>
      * In situations where it is usable, prefer {@link #getAllInBoxMutable(BlockPos, BlockPos}) instead as it has better
      * performance (fewer allocations)
-     *
-     * @see #getAllInBox(BlockPos, BlockPos)
-     * @see #getAllInBoxMutable(BlockPos, BlockPos)
-     * @see #mutablesBetween(int, int, int, int, int, int)
      *
      * @param x1 The lower x coordinate
      * @param y1 The lower y coordinate
@@ -267,9 +260,12 @@ public class BlockPos extends Vec3i {
      * @param x2 The upper x coordinate
      * @param y2 The upper y coordinate
      * @param z2 The upper z coordinate
+     * @see #getAllInBox(BlockPos, BlockPos)
+     * @see #getAllInBoxMutable(BlockPos, BlockPos)
+     * @see #mutablesBetween(int, int, int, int, int, int)
      */
     public static Iterable<BlockPos> getAllInBox(final int x1, final int y1, final int z1, final int x2, final int y2,
-        final int z2) {
+                                                 final int z2) {
         return new Iterable<BlockPos>() {
 
             public Iterator<BlockPos> iterator() {
@@ -321,23 +317,6 @@ public class BlockPos extends Vec3i {
         return this;
     }
 
-    /**
-     * Creates an Iterable that returns all positions in the box specified by the given corners. There is no requirement
-     * that one corner is greater than the other; individual coordinates will be swapped as needed.
-     *
-     * This method uses {@link BlockPos.MutableBlockPos MutableBlockPos} instead of regular BlockPos, which grants
-     * better performance. However, the resulting BlockPos instances can only be used inside the iteration loop (as
-     * otherwise the value will change), unless {@link #toImmutable()} is called. This method is ideal for searching
-     * large areas and only storing a few locations.
-     *
-     * @see #getAllInBox(BlockPos, BlockPos)
-     * @see #getAllInBox(int, int, int, int, int, int)
-     * @see #getAllInBoxMutable(BlockPos, BlockPos)
-     * @see #mutablesBetween(int, int, int, int, int, int)
-     *
-     * @param from One corner of the box
-     * @param to   Another corner of the box
-     */
     public static Iterable<BlockPos.MutableBlockPos> getAllInBoxMutable(BlockPos from, BlockPos to) {
         return getAllInBoxMutable(
             Math.min(from.getX(), to.getX()),
@@ -351,15 +330,11 @@ public class BlockPos extends Vec3i {
     /**
      * Creates an Iterable that returns all positions in the box specified by the given corners. <strong>Coordinates
      * must be in order</strong>; e.g. x1 <= x2.
-     *
+     * <p>
      * This method uses {@link BlockPos.MutableBlockPos MutableBlockPos} instead of regular BlockPos, which grants
      * better performance. However, the resulting BlockPos instances can only be used inside the iteration loop (as
      * otherwise the value will change), unless {@link #toImmutable()} is called. This method is ideal for searching
      * large areas and only storing a few locations.
-     *
-     * @see #getAllInBox(BlockPos, BlockPos)
-     * @see #getAllInBox(int, int, int, int, int, int)
-     * @see #getAllInBoxMutable(BlockPos, BlockPos)
      *
      * @param x1 The lower x coordinate
      * @param y1 The lower y coordinate
@@ -367,9 +342,12 @@ public class BlockPos extends Vec3i {
      * @param x2 The upper x coordinate
      * @param y2 The upper y coordinate
      * @param z2 The upper z coordinate
+     * @see #getAllInBox(BlockPos, BlockPos)
+     * @see #getAllInBox(int, int, int, int, int, int)
+     * @see #getAllInBoxMutable(BlockPos, BlockPos)
      */
     public static Iterable<BlockPos.MutableBlockPos> getAllInBoxMutable(final int x1, final int y1, final int z1,
-        final int x2, final int y2, final int z2) {
+                                                                        final int x2, final int y2, final int z2) {
         return new Iterable<BlockPos.MutableBlockPos>() {
 
             public Iterator<BlockPos.MutableBlockPos> iterator() {
@@ -405,11 +383,17 @@ public class BlockPos extends Vec3i {
 
     public static class MutableBlockPos extends BlockPos {
 
-        /** Mutable X Coordinate */
+        /**
+         * Mutable X Coordinate
+         */
         protected int x;
-        /** Mutable Y Coordinate */
+        /**
+         * Mutable Y Coordinate
+         */
         protected int y;
-        /** Mutable Z Coordinate */
+        /**
+         * Mutable Z Coordinate
+         */
         protected int z;
 
         public MutableBlockPos() {

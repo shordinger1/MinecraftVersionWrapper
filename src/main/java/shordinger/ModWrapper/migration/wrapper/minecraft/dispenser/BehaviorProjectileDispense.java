@@ -12,7 +12,7 @@ public abstract class BehaviorProjectileDispense extends BehaviorDefaultDispense
     /**
      * Dispense the specified stack, play the dispense sound and spawn particles.
      */
-    public ItemStack dispenseStack(IBlockSource source, ItemStack stack) {
+    public ItemStack dispenseStack(IWrapperBlockSource source, ItemStack stack) {
         World world = source.getWorld();
         IPosition iposition = BlockDispenser.getDispensePosition(source);
         EnumFacing enumfacing = (EnumFacing) source.getBlockState()
@@ -32,7 +32,7 @@ public abstract class BehaviorProjectileDispense extends BehaviorDefaultDispense
     /**
      * Play the dispense sound from the specified block.
      */
-    protected void playDispenseSound(IBlockSource source) {
+    protected void playDispenseSound(IWrapperBlockSource source) {
         source.getWorld()
             .playEvent(1002, source.getBlockPos(), 0);
     }

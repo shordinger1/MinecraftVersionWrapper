@@ -36,14 +36,14 @@ public class CommandTrigger extends CommandBase {
     /**
      * Gets the usage string for the command.
      */
-    public String getUsage(ICommandSender sender) {
+    public String getUsage(IWrapperCommandSender sender) {
         return "commands.trigger.usage";
     }
 
     /**
      * Callback for when the command is executed
      */
-    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
+    public void execute(MinecraftServer server, IWrapperCommandSender sender, String[] args) throws CommandException {
         if (args.length < 3) {
             throw new WrongUsageException("commands.trigger.usage", new Object[0]);
         } else {
@@ -106,8 +106,8 @@ public class CommandTrigger extends CommandBase {
     /**
      * Get a list of options for when the user presses the TAB key
      */
-    public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args,
-        @Nullable BlockPos targetPos) {
+    public List<String> getTabCompletions(MinecraftServer server, IWrapperCommandSender sender, String[] args,
+                                          @Nullable BlockPos targetPos) {
         if (args.length == 1) {
             Scoreboard scoreboard = server.getWorld(0)
                 .getScoreboard();

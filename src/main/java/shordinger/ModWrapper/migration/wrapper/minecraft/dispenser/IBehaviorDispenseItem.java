@@ -9,7 +9,7 @@ public interface IBehaviorDispenseItem {
         /**
          * Dispenses the specified ItemStack from a dispenser.
          */
-        public ItemStack dispense(IBlockSource source, ItemStack stack) {
+        public ItemStack dispense(IWrapperBlockSource source, ItemStack stack) {
             return stack;
         }
     };
@@ -17,5 +17,5 @@ public interface IBehaviorDispenseItem {
     /**
      * Dispenses the specified ItemStack from a dispenser.
      */
-    ItemStack dispense(IBlockSource source, ItemStack stack);
+    ItemStack dispense(IWrapperBlockSource source, ItemStack stack);
 }

@@ -101,11 +101,11 @@ public class EntitySelector {
      * Returns the one player that matches the given at-token. Returns null if more than one player matches.
      */
     @Nullable
-    public static EntityPlayerMP matchOnePlayer(ICommandSender sender, String token) throws CommandException {
+    public static EntityPlayerMP matchOnePlayer(IWrapperCommandSender sender, String token) throws CommandException {
         return (EntityPlayerMP) matchOneEntity(sender, token, EntityPlayerMP.class);
     }
 
-    public static List<EntityPlayerMP> getPlayers(ICommandSender sender, String token) throws CommandException {
+    public static List<EntityPlayerMP> getPlayers(IWrapperCommandSender sender, String token) throws CommandException {
         return matchEntities(sender, token, EntityPlayerMP.class);
     }
 
@@ -114,14 +114,14 @@ public class EntitySelector {
      * matches.
      */
     @Nullable
-    public static <T extends Entity> T matchOneEntity(ICommandSender sender, String token,
-        Class<? extends T> targetClass) throws CommandException {
+    public static <T extends Entity> T matchOneEntity(IWrapperCommandSender sender, String token,
+                                                      Class<? extends T> targetClass) throws CommandException {
         List<T> list = matchEntities(sender, token, targetClass);
         return (T) (list.size() == 1 ? (Entity) list.get(0) : null);
     }
 
     @Nullable
-    public static ITextComponent matchEntitiesToTextComponent(ICommandSender sender, String token)
+    public static ITextComponent matchEntitiesToTextComponent(IWrapperCommandSender sender, String token)
         throws CommandException {
         List<Entity> list = matchEntities(sender, token, Entity.class);
 
@@ -141,13 +141,13 @@ public class EntitySelector {
     /**
      * Returns all entities of the given class that matches the given at-token in a list.
      */
-    public static <T extends Entity> List<T> matchEntities(ICommandSender sender, String token,
-        Class<? extends T> targetClass) throws CommandException {
+    public static <T extends Entity> List<T> matchEntities(IWrapperCommandSender sender, String token,
+                                                           Class<? extends T> targetClass) throws CommandException {
         return net.minecraftforge.common.command.SelectorHandlerManager.matchEntities(sender, token, targetClass);
     }
 
-    public static <T extends Entity> List<T> matchEntitiesDefault(ICommandSender sender, String token,
-        Class<? extends T> targetClass) throws CommandException {
+    public static <T extends Entity> List<T> matchEntitiesDefault(IWrapperCommandSender sender, String token,
+                                                                  Class<? extends T> targetClass) throws CommandException {
         Matcher matcher = TOKEN_PATTERN.matcher(token);
 
         if (matcher.matches() && sender.canUseCommand(1, "@")) {
@@ -221,7 +221,7 @@ public class EntitySelector {
      * Returns the worlds to match the entities in for the specified command sender and token. This returns the sender's
      * world if the selector specifies a location or all currently loaded worlds on the server if not.
      */
-    private static List<World> getWorlds(ICommandSender sender, Map<String, String> argumentMap) {
+    private static List<World> getWorlds(IWrapperCommandSender sender, Map<String, String> argumentMap) {
         List<World> list = Lists.<World>newArrayList();
 
         if (hasArgument(argumentMap)) {
@@ -236,8 +236,8 @@ public class EntitySelector {
     /**
      * Checks to make sure that the specified type is valid
      */
-    private static <T extends Entity> boolean isEntityTypeValid(ICommandSender commandSender,
-        Map<String, String> params) {
+    private static <T extends Entity> boolean isEntityTypeValid(IWrapperCommandSender commandSender,
+                                                                Map<String, String> params) {
         String s = getArgument(params, ARGUMENT_ENTITY_TYPE);
 
         if (s == null) {
@@ -372,7 +372,7 @@ public class EntitySelector {
         return list;
     }
 
-    private static List<Predicate<Entity>> getScorePredicates(final ICommandSender sender, Map<String, String> params) {
+    private static List<Predicate<Entity>> getScorePredicates(final IWrapperCommandSender sender, Map<String, String> params) {
         final Map<String, Integer> map = getScoreMap(params);
         return (List<Predicate<Entity>>) (map.isEmpty() ? Collections.emptyList()
             : Lists.newArrayList(new Predicate<Entity>() {
@@ -613,8 +613,8 @@ public class EntitySelector {
     }
 
     private static <T extends Entity> List<T> getEntitiesFromPredicates(List<T> matchingEntities,
-        Map<String, String> params, ICommandSender sender, Class<? extends T> targetClass, String type,
-        final Vec3d pos) {
+                                                                        Map<String, String> params, IWrapperCommandSender sender, Class<? extends T> targetClass, String type,
+                                                                        final Vec3d pos) {
         int i = getInt(params, ARGUMENT_COUNT, !type.equals("a") && !type.equals("e") ? 1 : 0);
 
         if (!type.equals("p") && !type.equals("a") && !type.equals("e")) {

@@ -9,7 +9,9 @@ import cpw.mods.fml.relauncher.SideOnly;
 public class MathHelper {
 
     public static final float SQRT_2 = sqrt(2.0F);
-    /** A table of sin values computed from 0 (inclusive) to 2*pi (exclusive), with steps of 2*PI / 65536. */
+    /**
+     * A table of sin values computed from 0 (inclusive) to 2*pi (exclusive), with steps of 2*PI / 65536.
+     */
     private static final float[] SIN_TABLE = new float[65536];
     private static final Random RANDOM = new Random();
     /**
@@ -333,7 +335,7 @@ public class MathHelper {
 
     /**
      * Rounds the first parameter up to the next interval of the second parameter.
-     *
+     * <p>
      * For instance, {@code roundUp(1, 4)} returns 4; {@code roundUp(0, 4)} returns 0; and {@code roundUp(4, 4)} returns
      * 4.
      */
@@ -558,8 +560,8 @@ public class MathHelper {
             SIN_TABLE[i] = (float) Math.sin((double) i * Math.PI * 2.0D / 65536.0D);
         }
 
-        MULTIPLY_DE_BRUIJN_BIT_POSITION = new int[] { 0, 1, 28, 2, 29, 14, 24, 3, 30, 22, 20, 15, 25, 17, 4, 8, 31, 27,
-            13, 23, 21, 19, 16, 7, 26, 12, 18, 6, 11, 5, 10, 9 };
+        MULTIPLY_DE_BRUIJN_BIT_POSITION = new int[]{0, 1, 28, 2, 29, 14, 24, 3, 30, 22, 20, 15, 25, 17, 4, 8, 31, 27,
+            13, 23, 21, 19, 16, 7, 26, 12, 18, 6, 11, 5, 10, 9};
         FRAC_BIAS = Double.longBitsToDouble(4805340802404319232L);
         ASINE_TAB = new double[257];
         COS_TAB = new double[257];

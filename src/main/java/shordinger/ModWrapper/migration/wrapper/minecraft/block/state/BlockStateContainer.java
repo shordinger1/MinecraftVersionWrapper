@@ -11,7 +11,6 @@ import java.util.regex.Pattern;
 import javax.annotation.Nullable;
 
 import com.google.common.collect.ImmutableCollection;
-import net.minecraft.block.Block;
 import net.minecraft.block.material.MapColor;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
@@ -31,12 +30,12 @@ import com.google.common.collect.Table;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import shordinger.ModWrapper.migration.wrapper.minecraft.block.WrapperBlock;
+import shordinger.ModWrapper.migration.wrapper.minecraft.block.Block;
 import shordinger.ModWrapper.migration.wrapper.minecraft.block.material.EnumPushReaction;
 import shordinger.ModWrapper.migration.wrapper.minecraft.block.properties.IProperty;
 import shordinger.ModWrapper.migration.wrapper.minecraft.util.EnumBlockRenderType;
 import shordinger.ModWrapper.migration.wrapper.minecraft.util.MapPopulator;
-import shordinger.ModWrapper.migration.wrapper.minecraft.util.WrapperRotation;
+import shordinger.ModWrapper.migration.wrapper.minecraft.util.Rotation;
 import shordinger.ModWrapper.migration.wrapper.minecraft.util.math.AxisAlignedBB;
 import shordinger.ModWrapper.migration.wrapper.minecraft.util.math.BlockPos;
 import shordinger.ModWrapper.migration.wrapper.minecraft.util.math.Cartesian;
@@ -56,21 +55,21 @@ public class BlockStateContainer {
             return p_apply_1_ == null ? "<NULL>" : p_apply_1_.getName();
         }
     };
-    private final Block block;
+    private final net.minecraft.block.Block block;
     private final ImmutableSortedMap<String, IProperty<?>> properties;
-    private final ImmutableList<IWrapperBlockState> validStates;
+    private final ImmutableList<IBlockState> validStates;
 
-    public BlockStateContainer(Block blockIn, IProperty<?>... properties) {
+    public BlockStateContainer(net.minecraft.block.Block blockIn, IProperty<?>... properties) {
         this(blockIn, properties, null);
     }
 
-    protected StateImplementation createState(Block block, ImmutableMap<IProperty<?>, Comparable<?>> properties,
-        @Nullable ImmutableMap<net.minecraftforge.common.property.IUnlistedProperty<?>, java.util.Optional<?>> unlistedProperties) {
+    protected StateImplementation createState(net.minecraft.block.Block block, ImmutableMap<IProperty<?>, Comparable<?>> properties,
+                                              @Nullable ImmutableMap<net.minecraftforge.common.property.IUnlistedProperty<?>, java.util.Optional<?>> unlistedProperties) {
         return new StateImplementation(block, properties);
     }
 
-    protected BlockStateContainer(Block blockIn, IProperty<?>[] properties,
-        ImmutableMap<net.minecraftforge.common.property.IUnlistedProperty<?>, java.util.Optional<?>> unlistedProperties) {
+    protected BlockStateContainer(net.minecraft.block.Block blockIn, IProperty<?>[] properties,
+                                  ImmutableMap<net.minecraftforge.common.property.IUnlistedProperty<?>, java.util.Optional<?>> unlistedProperties) {
         this.block = blockIn;
         Map<String, IProperty<?>> map = Maps.<String, IProperty<?>>newHashMap();
 
@@ -98,10 +97,10 @@ public class BlockStateContainer {
             blockstatecontainer$stateimplementation1.buildPropertyValueTable(map2);
         }
 
-        this.validStates = ImmutableList.<IWrapperBlockState>copyOf(list1);
+        this.validStates = ImmutableList.<IBlockState>copyOf(list1);
     }
 
-    public static <T extends Comparable<T>> String validateProperty(Block block, IProperty<T> property) {
+    public static <T extends Comparable<T>> String validateProperty(net.minecraft.block.Block block, IProperty<T> property) {
         String s = property.getName();
 
         if (!NAME_PATTERN.matcher(s)
@@ -122,7 +121,7 @@ public class BlockStateContainer {
         }
     }
 
-    public ImmutableList<IWrapperBlockState> getValidStates() {
+    public ImmutableList<IBlockState> getValidStates() {
         return this.validStates;
     }
 
@@ -137,11 +136,11 @@ public class BlockStateContainer {
         return list;
     }
 
-    public IWrapperBlockState getBaseState() {
-        return (IWrapperBlockState) this.validStates.get(0);
+    public IBlockState getBaseState() {
+        return (IBlockState) this.validStates.get(0);
     }
 
-    public Block getBlock() {
+    public net.minecraft.block.Block getBlock() {
         return this.block;
     }
 
@@ -161,20 +160,20 @@ public class BlockStateContainer {
         return (IProperty) this.properties.get(propertyName);
     }
 
-    public static class StateImplementation extends WrapperBlockStateBase {
+    public static class StateImplementation extends BlockStateBase {
 
-        private final WrapperBlock block;
+        private final Block block;
         private final ImmutableMap<IProperty<?>, Comparable<?>> properties;
-        protected ImmutableTable<IProperty<?>, Comparable<?>, IWrapperBlockState> propertyValueTable;
+        protected ImmutableTable<IProperty<?>, Comparable<?>, IBlockState> propertyValueTable;
 
-        protected StateImplementation(Block blockIn, ImmutableMap<IProperty<?>, Comparable<?>> propertiesIn) {
-            this.block = (WrapperBlock) blockIn;
+        protected StateImplementation(net.minecraft.block.Block blockIn, ImmutableMap<IProperty<?>, Comparable<?>> propertiesIn) {
+            this.block = (Block) blockIn;
             this.properties = propertiesIn;
         }
 
-        protected StateImplementation(Block blockIn, ImmutableMap<IProperty<?>, Comparable<?>> propertiesIn,
-            ImmutableTable<IProperty<?>, Comparable<?>, IWrapperBlockState> propertyValueTable) {
-            this.block = (WrapperBlock) blockIn;
+        protected StateImplementation(net.minecraft.block.Block blockIn, ImmutableMap<IProperty<?>, Comparable<?>> propertiesIn,
+                                      ImmutableTable<IProperty<?>, Comparable<?>, IBlockState> propertyValueTable) {
+            this.block = (Block) blockIn;
             this.properties = propertiesIn;
             this.propertyValueTable = propertyValueTable;
         }
@@ -201,7 +200,7 @@ public class BlockStateContainer {
         /**
          * Get a version of this BlockState with the given Property now set to the given value
          */
-        public <T extends Comparable<T>, V extends T> IWrapperBlockState withProperty(IProperty<T> property, V value) {
+        public <T extends Comparable<T>, V extends T> IBlockState withProperty(IProperty<T> property, V value) {
             Comparable<?> comparable = this.properties.get(property);
 
             if (comparable == null) {
@@ -210,7 +209,7 @@ public class BlockStateContainer {
             } else if (comparable == value) {
                 return this;
             } else {
-                IWrapperBlockState iblockstate = (IWrapperBlockState) this.propertyValueTable.get(property, value);
+                IBlockState iblockstate = (IBlockState) this.propertyValueTable.get(property, value);
 
                 if (iblockstate == null) {
                     throw new IllegalArgumentException(
@@ -218,7 +217,7 @@ public class BlockStateContainer {
                             + " to "
                             + value
                             + " on block "
-                            + Block.blockRegistry.getNameForObject(this.block)
+                            + net.minecraft.block.Block.blockRegistry.getNameForObject(this.block)
                             + ", it is not an allowed value");
                 } else {
                     return iblockstate;
@@ -230,7 +229,7 @@ public class BlockStateContainer {
             return this.properties;
         }
 
-        public WrapperBlock getBlock() {
+        public Block getBlock() {
             return this.block;
         }
 
@@ -244,8 +243,8 @@ public class BlockStateContainer {
             if (this.propertyValueTable != null) {
                 throw new IllegalStateException();
             } else {
-                Table<IProperty<?>, Comparable<?>, IWrapperBlockState> table = HashBasedTable
-                    .<IProperty<?>, Comparable<?>, IWrapperBlockState>create();
+                Table<IProperty<?>, Comparable<?>, IBlockState> table = HashBasedTable
+                    .<IProperty<?>, Comparable<?>, IBlockState>create();
 
                 for (Entry<IProperty<?>, Comparable<?>> iPropertyComparableEntry : this.properties.entrySet()) {
                     IProperty<?> iproperty = ((Entry<IProperty<?>, Comparable<?>>) (Entry) iPropertyComparableEntry).getKey();
@@ -306,14 +305,14 @@ public class BlockStateContainer {
         /**
          * Returns the blockstate with the given rotation. If inapplicable, returns itself.
          */
-        public IWrapperBlockState withRotation(WrapperRotation rot) {
+        public IBlockState withRotation(Rotation rot) {
             return this.block.withRotation(this, rot);
         }
 
         /**
          * Returns the blockstate mirrored in the given way. If inapplicable, returns itself.
          */
-        public IWrapperBlockState withMirror(Mirror mirrorIn) {
+        public IBlockState withMirror(Mirror mirrorIn) {
             return this.block.withMirror(this, mirrorIn);
         }
 
@@ -380,7 +379,7 @@ public class BlockStateContainer {
             return this.block.getMobilityFlag(this);
         }
 
-        public IWrapperBlockState getActualState(IWrapperBlockAccess blockAccess, BlockPos pos) {
+        public IBlockState getActualState(IWrapperBlockAccess blockAccess, BlockPos pos) {
             return this.block.getActualState(this, blockAccess, pos);
         }
 
@@ -404,7 +403,7 @@ public class BlockStateContainer {
         }
 
         public void addCollisionBoxToList(World worldIn, BlockPos pos, AxisAlignedBB entityBox,
-            List<AxisAlignedBB> collidingBoxes, @Nullable Entity entityIn, boolean p_185908_6_) {
+                                          List<AxisAlignedBB> collidingBoxes, @Nullable Entity entityIn, boolean p_185908_6_) {
             this.block.addCollisionBoxToList(this, worldIn, pos, entityBox, collidingBoxes, entityIn, p_185908_6_);
         }
 
@@ -446,8 +445,8 @@ public class BlockStateContainer {
          * @param blockIn The neighboring block causing this block update
          * @param fromPos The neighboring position causing this block update
          */
-        public void neighborChanged(World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos) {
-            this.block.neighborChanged(this, worldIn, pos, (WrapperBlock) blockIn, fromPos);
+        public void neighborChanged(World worldIn, BlockPos pos, net.minecraft.block.Block blockIn, BlockPos fromPos) {
+            this.block.neighborChanged(this, worldIn, pos, (Block) blockIn, fromPos);
         }
 
         public boolean causesSuffocation() {
@@ -460,7 +459,7 @@ public class BlockStateContainer {
 
         // Forge Start
         @Override
-        public ImmutableTable<IProperty<?>, Comparable<?>, IWrapperBlockState> getPropertyValueTable() {
+        public ImmutableTable<IProperty<?>, Comparable<?>, IBlockState> getPropertyValueTable() {
             return propertyValueTable;
         }
 
@@ -505,11 +504,11 @@ public class BlockStateContainer {
      */
     public static class Builder {
 
-        private final Block block;
+        private final net.minecraft.block.Block block;
         private final List<IProperty<?>> listed = Lists.newArrayList();
         private final List<net.minecraftforge.common.property.IUnlistedProperty<?>> unlisted = Lists.newArrayList();
 
-        public Builder(Block block) {
+        public Builder(net.minecraft.block.Block block) {
             this.block = block;
         }
 

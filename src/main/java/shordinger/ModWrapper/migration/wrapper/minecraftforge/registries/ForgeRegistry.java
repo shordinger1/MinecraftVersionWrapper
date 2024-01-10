@@ -63,7 +63,7 @@ public class ForgeRegistry<V extends IForgeRegistryEntry<V>>
     implements IForgeRegistryInternal<V>, IForgeRegistryModifiable<V> {
 
     public static final boolean DEBUG = Boolean.parseBoolean(System.getProperty("forge.debugRegistryEntries", "false"));
-    private final RegistryManager stage;
+    private final WrapperRegistryManager stage;
     private final BiMap<Integer, V> ids = HashBiMap.create();
     private final BiMap<ResourceLocation, V> names = HashBiMap.create();
     private final Class<V> superType;
@@ -91,9 +91,9 @@ public class ForgeRegistry<V extends IForgeRegistryEntry<V>>
     boolean isFrozen = false;
 
     ForgeRegistry(Class<V> superType, ResourceLocation defaultKey, int min, int max, @Nullable CreateCallback<V> create,
-        @Nullable AddCallback<V> add, @Nullable ClearCallback<V> clear, @Nullable ValidateCallback<V> validate,
-        RegistryManager stage, boolean allowOverrides, boolean isModifiable, @Nullable DummyFactory<V> dummyFactory,
-        @Nullable MissingFactory<V> missing) {
+                  @Nullable AddCallback<V> add, @Nullable ClearCallback<V> clear, @Nullable ValidateCallback<V> validate,
+                  WrapperRegistryManager stage, boolean allowOverrides, boolean isModifiable, @Nullable DummyFactory<V> dummyFactory,
+                  @Nullable MissingFactory<V> missing) {
         this.stage = stage;
         this.superType = superType;
         this.defaultKey = defaultKey;
@@ -258,7 +258,7 @@ public class ForgeRegistry<V extends IForgeRegistryEntry<V>>
             "Missing default of ForgeRegistry: " + this.defaultKey + " Type: " + this.superType);
     }
 
-    ForgeRegistry<V> copy(RegistryManager stage) {
+    ForgeRegistry<V> copy(WrapperRegistryManager stage) {
         return new ForgeRegistry<V>(
             superType,
             defaultKey,
@@ -356,7 +356,7 @@ public class ForgeRegistry<V extends IForgeRegistryEntry<V>>
                     .contains(oldEntry)) this.overrides.put(key, oldEntry);
                 this.overrides.get(key)
                     .remove(value);
-                if (this.stage == RegistryManager.ACTIVE) getDelegate(oldEntry).changeReference(value);
+                if (this.stage == WrapperRegistryManager.ACTIVE) getDelegate(oldEntry).changeReference(value);
             }
         }
 
@@ -958,7 +958,7 @@ public class ForgeRegistry<V extends IForgeRegistryEntry<V>>
 
     public MissingMappings<?> getMissingEvent(ResourceLocation name, Map<ResourceLocation, Integer> map) {
         List<MissingMappings.Mapping<V>> lst = Lists.newArrayList();
-        ForgeRegistry<V> pool = RegistryManager.ACTIVE.getRegistry(name);
+        ForgeRegistry<V> pool = WrapperRegistryManager.ACTIVE.getRegistry(name);
         map.forEach((rl, id) -> lst.add(new MissingMappings.Mapping<V>(this, pool, rl, id)));
         return new MissingMappings<V>(name, this, lst);
     }

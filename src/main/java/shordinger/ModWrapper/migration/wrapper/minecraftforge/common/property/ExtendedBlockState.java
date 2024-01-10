@@ -71,7 +71,7 @@ public class ExtendedBlockState extends BlockStateContainer {
     }
 
     protected static class ExtendedStateImplementation extends StateImplementation
-        implements IExtendedWrapperBlockState {
+        implements IExtendedBlockState {
 
         private final ImmutableMap<IUnlistedProperty<?>, Optional<?>> unlistedProperties;
         private IWrapperBlockState cleanState;
@@ -109,7 +109,7 @@ public class ExtendedBlockState extends BlockStateContainer {
         }
 
         @Override
-        public <V> IExtendedWrapperBlockState withProperty(IUnlistedProperty<V> property, @Nullable V value) {
+        public <V> IExtendedBlockState withProperty(IUnlistedProperty<V> property, @Nullable V value) {
             Optional<?> oldValue = unlistedProperties.get(property);
             if (oldValue == null) {
                 throw new IllegalArgumentException(
@@ -138,7 +138,7 @@ public class ExtendedBlockState extends BlockStateContainer {
                 builder.put(key, newValue);
             }
             if (clean) { // no dynamic properties, lookup normal state
-                return (IExtendedWrapperBlockState) cleanState;
+                return (IExtendedBlockState) cleanState;
             }
             return new ExtendedStateImplementation(
                 getBlock(),

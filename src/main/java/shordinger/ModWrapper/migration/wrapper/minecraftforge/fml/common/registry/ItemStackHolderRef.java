@@ -24,7 +24,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.common.FMLLog;
 
 /**
- * Internal class used in tracking {@link GameRegistry.ItemStackHolder} references
+ * Internal class used in tracking {@link WrapperGameRegistry.ItemStackHolder} references
  *
  * @author cpw
  *
@@ -71,7 +71,7 @@ class ItemStackHolderRef {
     public void apply() {
         ItemStack is;
         try {
-            is = GameRegistry.makeItemStack(itemName, meta, 1, serializednbt);
+            is = WrapperGameRegistry.makeItemStack(itemName, meta, 1, serializednbt);
         } catch (RuntimeException e) {
             FMLLog.log.error(
                 "Caught exception processing itemstack {},{},{} in annotation at {}.{}",

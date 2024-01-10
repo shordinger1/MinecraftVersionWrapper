@@ -87,7 +87,7 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityDamageSource;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.EnumHandSide;
-import net.minecraft.util.NonNullList;
+import shordinger.ModWrapper.migration.wrapper.minecraft.util.NonNullList;
 import net.minecraft.util.ReportedException;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
@@ -183,7 +183,7 @@ public class EntityPlayerMP extends EntityPlayer implements IContainerListener {
     public boolean queuedEndExit;
 
     public EntityPlayerMP(MinecraftServer server, WorldServer worldIn, GameProfile profile,
-        PlayerInteractionManager interactionManagerIn) {
+                          PlayerInteractionManager interactionManagerIn) {
         super(worldIn, profile);
         interactionManagerIn.player = this;
         this.interactionManager = interactionManagerIn;

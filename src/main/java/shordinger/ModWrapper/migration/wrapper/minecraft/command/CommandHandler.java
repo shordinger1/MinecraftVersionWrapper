@@ -35,7 +35,7 @@ public abstract class CommandHandler implements ICommandManager {
      * command does not exist or if the player does not have permission, 0 will be returned. A number greater than 1 can
      * be returned if a player selector is used.
      */
-    public int executeCommand(ICommandSender sender, String rawCommand) {
+    public int executeCommand(IWrapperCommandSender sender, String rawCommand) {
         rawCommand = rawCommand.trim();
 
         if (rawCommand.startsWith("/")) {
@@ -119,7 +119,7 @@ public abstract class CommandHandler implements ICommandManager {
         return i;
     }
 
-    protected boolean tryExecute(ICommandSender sender, String[] args, ICommand command, String input) {
+    protected boolean tryExecute(IWrapperCommandSender sender, String[] args, ICommand command, String input) {
         try {
             command.execute(this.getServer(), sender, args);
             return true;
@@ -187,7 +187,7 @@ public abstract class CommandHandler implements ICommandManager {
      * command is specified or a partial command is specified. It could also be a list of arguments for the command that
      * is specified.
      */
-    public List<String> getTabCompletions(ICommandSender sender, String input, @Nullable BlockPos pos) {
+    public List<String> getTabCompletions(IWrapperCommandSender sender, String input, @Nullable BlockPos pos) {
         String[] astring = input.split(" ", -1);
         String s = astring[0];
 
@@ -218,7 +218,7 @@ public abstract class CommandHandler implements ICommandManager {
     /**
      * Get a list of commands that the given command sender has access to execute.
      */
-    public List<ICommand> getPossibleCommands(ICommandSender sender) {
+    public List<ICommand> getPossibleCommands(IWrapperCommandSender sender) {
         List<ICommand> list = Lists.<ICommand>newArrayList();
 
         for (ICommand icommand : this.commandSet) {

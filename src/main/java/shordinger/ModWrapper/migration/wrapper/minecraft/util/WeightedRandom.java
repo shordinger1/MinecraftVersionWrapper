@@ -3,7 +3,7 @@ package shordinger.ModWrapper.migration.wrapper.minecraft.util;
 import java.util.List;
 import java.util.Random;
 
-public class WeightedRandom {
+public class WeightedRandom extends net.minecraft.util.WeightedRandom {
 
     /**
      * Returns the total weight of all items in a collection.
@@ -54,13 +54,4 @@ public class WeightedRandom {
         return (T) getRandomItem(random, collection, getTotalWeight(collection));
     }
 
-    public static class Item {
-
-        /** The Weight is how often the item is chosen(higher number is higher chance(lower is lower)) */
-        public int itemWeight;
-
-        public Item(int itemWeightIn) {
-            this.itemWeight = itemWeightIn;
-        }
-    }
 }

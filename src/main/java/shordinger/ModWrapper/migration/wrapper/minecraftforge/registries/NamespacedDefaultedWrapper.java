@@ -149,7 +149,7 @@ class NamespacedDefaultedWrapper<V extends IForgeRegistryEntry<V>>
         public static final ResourceLocation ID = new ResourceLocation("forge", "registry_defaulted_wrapper");
 
         @Override
-        public void onCreate(IForgeRegistryInternal<V> owner, RegistryManager stage) {
+        public void onCreate(IForgeRegistryInternal<V> owner, WrapperRegistryManager stage) {
             owner.setSlaveMap(ID, new NamespacedDefaultedWrapper<V>((ForgeRegistry<V>) owner));
         }
     }

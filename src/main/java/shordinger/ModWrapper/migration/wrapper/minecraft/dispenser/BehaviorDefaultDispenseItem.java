@@ -11,7 +11,7 @@ public class BehaviorDefaultDispenseItem implements IBehaviorDispenseItem {
     /**
      * Dispenses the specified ItemStack from a dispenser.
      */
-    public final ItemStack dispense(IBlockSource source, ItemStack stack) {
+    public final ItemStack dispense(IWrapperBlockSource source, ItemStack stack) {
         ItemStack itemstack = this.dispenseStack(source, stack);
         this.playDispenseSound(source);
         this.spawnDispenseParticles(
@@ -24,7 +24,7 @@ public class BehaviorDefaultDispenseItem implements IBehaviorDispenseItem {
     /**
      * Dispense the specified stack, play the dispense sound and spawn particles.
      */
-    protected ItemStack dispenseStack(IBlockSource source, ItemStack stack) {
+    protected ItemStack dispenseStack(IWrapperBlockSource source, ItemStack stack) {
         EnumFacing enumfacing = (EnumFacing) source.getBlockState()
             .getValue(BlockDispenser.FACING);
         IPosition iposition = BlockDispenser.getDispensePosition(source);
@@ -58,7 +58,7 @@ public class BehaviorDefaultDispenseItem implements IBehaviorDispenseItem {
     /**
      * Play the dispense sound from the specified block.
      */
-    protected void playDispenseSound(IBlockSource source) {
+    protected void playDispenseSound(IWrapperBlockSource source) {
         source.getWorld()
             .playEvent(1000, source.getBlockPos(), 0);
     }
@@ -66,7 +66,7 @@ public class BehaviorDefaultDispenseItem implements IBehaviorDispenseItem {
     /**
      * Order clients to display dispense particles from the specified block and facing.
      */
-    protected void spawnDispenseParticles(IBlockSource source, EnumFacing facingIn) {
+    protected void spawnDispenseParticles(IWrapperBlockSource source, EnumFacing facingIn) {
         source.getWorld()
             .playEvent(2000, source.getBlockPos(), this.getWorldEventDataFrom(facingIn));
     }

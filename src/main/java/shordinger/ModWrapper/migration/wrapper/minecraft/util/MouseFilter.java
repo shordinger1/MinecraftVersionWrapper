@@ -4,7 +4,7 @@ import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
-public class MouseFilter {
+public class MouseFilter extends net.minecraft.util.MouseFilter {
 
     private float targetValue;
     private float remainingValue;

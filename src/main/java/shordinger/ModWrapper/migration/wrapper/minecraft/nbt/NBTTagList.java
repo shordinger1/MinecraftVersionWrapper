@@ -22,7 +22,7 @@ public class NBTTagList extends NBTBase implements java.lang.Iterable<NBTBase> {
     /**
      * Write the actual data contents of the tag, implemented in NBT extension classes
      */
-    void write(DataOutput output) throws IOException {
+    public void write(DataOutput output) throws IOException {
         if (this.tagList.isEmpty()) {
             this.tagType = 0;
         } else {
@@ -37,7 +37,7 @@ public class NBTTagList extends NBTBase implements java.lang.Iterable<NBTBase> {
         }
     }
 
-    void read(DataInput input, int depth, NBTSizeTracker sizeTracker) throws IOException {
+    public void read(DataInput input, int depth, NBTSizeTracker sizeTracker) throws IOException {
         sizeTracker.read(296L);
 
         if (depth > 512) {

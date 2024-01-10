@@ -68,7 +68,7 @@ public interface IForgeRegistry<V extends IForgeRegistryEntry<V>> extends Iterab
     /**
      * Retrieve the slave map of type T from the registry.
      * Slave maps are maps which are dependent on registry content in some way.
-     * 
+     *
      * @param slaveMapName The name of the slavemap
      * @param type         The type
      * @param <T>          Type to return
@@ -82,7 +82,7 @@ public interface IForgeRegistry<V extends IForgeRegistryEntry<V>> extends Iterab
      */
     interface AddCallback<V extends IForgeRegistryEntry<V>> {
 
-        void onAdd(IForgeRegistryInternal<V> owner, RegistryManager stage, int id, V obj, @Nullable V oldObj);
+        void onAdd(IForgeRegistryInternal<V> owner, WrapperRegistryManager stage, int id, V obj, @Nullable V oldObj);
     }
 
     /**
@@ -91,7 +91,7 @@ public interface IForgeRegistry<V extends IForgeRegistryEntry<V>> extends Iterab
      */
     interface ClearCallback<V extends IForgeRegistryEntry<V>> {
 
-        void onClear(IForgeRegistryInternal<V> owner, RegistryManager stage);
+        void onClear(IForgeRegistryInternal<V> owner, WrapperRegistryManager stage);
     }
 
     /**
@@ -99,7 +99,7 @@ public interface IForgeRegistry<V extends IForgeRegistryEntry<V>> extends Iterab
      */
     interface CreateCallback<V extends IForgeRegistryEntry<V>> {
 
-        void onCreate(IForgeRegistryInternal<V> owner, RegistryManager stage);
+        void onCreate(IForgeRegistryInternal<V> owner, WrapperRegistryManager stage);
     }
 
     /**
@@ -107,7 +107,7 @@ public interface IForgeRegistry<V extends IForgeRegistryEntry<V>> extends Iterab
      */
     interface ValidateCallback<V extends IForgeRegistryEntry<V>> {
 
-        void onValidate(IForgeRegistryInternal<V> owner, RegistryManager stage, int id, ResourceLocation key, V obj);
+        void onValidate(IForgeRegistryInternal<V> owner, WrapperRegistryManager stage, int id, ResourceLocation key, V obj);
     }
 
     /**

@@ -18,11 +18,11 @@ public class NBTTagLong extends NBTPrimitive {
     /**
      * Write the actual data contents of the tag, implemented in NBT extension classes
      */
-    void write(DataOutput output) throws IOException {
+    public void write(DataOutput output) throws IOException {
         output.writeLong(this.data);
     }
 
-    void read(DataInput input, int depth, NBTSizeTracker sizeTracker) throws IOException {
+    public void read(DataInput input, int depth, NBTSizeTracker sizeTracker) throws IOException {
         sizeTracker.read(128L);
         this.data = input.readLong();
     }

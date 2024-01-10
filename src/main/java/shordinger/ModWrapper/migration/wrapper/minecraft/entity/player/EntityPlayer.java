@@ -6,83 +6,6 @@ import java.util.UUID;
 
 import javax.annotation.Nullable;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockHorizontal;
-import net.minecraft.block.material.Material;
-import net.minecraft.block.state.IWrapperBlockState;
-import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityList;
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.EnumCreatureAttribute;
-import net.minecraft.entity.IEntityMultiPart;
-import net.minecraft.entity.IMerchant;
-import net.minecraft.entity.MultiPartEntityPart;
-import net.minecraft.entity.SharedMonsterAttributes;
-import net.minecraft.entity.ai.attributes.IAttributeInstance;
-import net.minecraft.entity.item.EntityBoat;
-import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.item.EntityMinecart;
-import net.minecraft.entity.monster.EntityMob;
-import net.minecraft.entity.passive.AbstractHorse;
-import net.minecraft.entity.passive.EntityParrot;
-import net.minecraft.entity.passive.EntityPig;
-import net.minecraft.entity.passive.EntityTameable;
-import net.minecraft.entity.projectile.EntityFishHook;
-import net.minecraft.init.Items;
-import net.minecraft.init.MobEffects;
-import net.minecraft.init.SoundEvents;
-import net.minecraft.inventory.Container;
-import net.minecraft.inventory.ContainerPlayer;
-import net.minecraft.inventory.EntityEquipmentSlot;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.InventoryEnderChest;
-import net.minecraft.item.ItemArmor;
-import net.minecraft.item.ItemElytra;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemSword;
-import net.minecraft.item.crafting.IRecipe;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
-import net.minecraft.network.datasync.DataParameter;
-import net.minecraft.network.datasync.DataSerializers;
-import net.minecraft.network.datasync.EntityDataManager;
-import net.minecraft.network.play.server.SPacketEntityVelocity;
-import net.minecraft.scoreboard.ScorePlayerTeam;
-import net.minecraft.scoreboard.Scoreboard;
-import net.minecraft.scoreboard.Team;
-import net.minecraft.stats.StatBase;
-import net.minecraft.stats.StatList;
-import net.minecraft.tileentity.CommandBlockBaseLogic;
-import net.minecraft.tileentity.TileEntityCommandBlock;
-import net.minecraft.tileentity.TileEntitySign;
-import net.minecraft.tileentity.TileEntityStructure;
-import net.minecraft.util.CooldownTracker;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.EnumActionResult;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
-import net.minecraft.util.EnumHandSide;
-import net.minecraft.util.EnumParticleTypes;
-import net.minecraft.util.FoodStats;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.SoundEvent;
-import net.minecraft.util.datafix.DataFixer;
-import net.minecraft.util.datafix.DataFixesManager;
-import net.minecraft.util.datafix.FixTypes;
-import net.minecraft.util.datafix.IDataFixer;
-import net.minecraft.util.datafix.IDataWalker;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentString;
-import net.minecraft.util.text.event.ClickEvent;
-import net.minecraft.world.EnumDifficulty;
-import net.minecraft.world.GameType;
-import net.minecraft.world.IInteractionObject;
-import net.minecraft.world.LockCode;
-import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
@@ -90,6 +13,7 @@ import com.mojang.authlib.GameProfile;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import shordinger.ModWrapper.migration.wrapper.minecraft.entity.EntityLivingBase;
 import shordinger.ModWrapper.migration.wrapper.minecraft.util.math.AxisAlignedBB;
 import shordinger.ModWrapper.migration.wrapper.minecraft.util.math.BlockPos;
 import shordinger.ModWrapper.migration.wrapper.minecraft.util.math.MathHelper;
@@ -2544,7 +2468,7 @@ public abstract class EntityPlayer extends EntityLivingBase {
     /* ======================================== FORGE START ===================================== */
     /**
      * A dimension aware version of getBedLocation.
-     * 
+     *
      * @param dimension The dimension to get the bed spawn for
      * @return The player specific spawn location for the dimension. May be null.
      */
@@ -2556,7 +2480,7 @@ public abstract class EntityPlayer extends EntityLivingBase {
      * A dimension aware version of isSpawnForced.
      * Noramally isSpawnForced is used to determine if the respawn system should check for a bed or not.
      * This just extends that to be dimension aware.
-     * 
+     *
      * @param dimension The dimension to get whether to check for a bed before spawning for
      * @return The player specific spawn location for the dimension. May be null.
      */
@@ -2570,7 +2494,7 @@ public abstract class EntityPlayer extends EntityLivingBase {
      * A dimension aware version of setSpawnChunk.
      * This functions identically, but allows you to specify which dimension to affect, rather than affecting the
      * player's current dimension.
-     * 
+     *
      * @param pos       The spawn point to set as the player-specific spawn point for the dimension
      * @param forced    Whether or not the respawn code should check for a bed at this location (true means it won't
      *                  check for a bed)
@@ -2601,7 +2525,7 @@ public abstract class EntityPlayer extends EntityLivingBase {
 
     /**
      * Returns the default eye height of the player
-     * 
+     *
      * @return player default eye height
      */
     public float getDefaultEyeHeight() {
@@ -2610,7 +2534,7 @@ public abstract class EntityPlayer extends EntityLivingBase {
 
     /**
      * Get the currently computed display name, cached for efficiency.
-     * 
+     *
      * @return the current display name
      */
     public String getDisplayNameString() {
@@ -2632,7 +2556,7 @@ public abstract class EntityPlayer extends EntityLivingBase {
 
     /**
      * Add a prefix to the player's username in chat
-     * 
+     *
      * @param prefix The prefix
      */
     public void addPrefix(ITextComponent prefix) {
@@ -2641,7 +2565,7 @@ public abstract class EntityPlayer extends EntityLivingBase {
 
     /**
      * Add a suffix to the player's username in chat
-     * 
+     *
      * @param suffix The suffix
      */
     public void addSuffix(ITextComponent suffix) {

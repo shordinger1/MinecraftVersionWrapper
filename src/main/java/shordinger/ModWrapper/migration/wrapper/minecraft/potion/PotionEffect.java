@@ -14,7 +14,7 @@ import cpw.mods.fml.relauncher.SideOnly;
 public class PotionEffect implements Comparable<PotionEffect> {
 
     private static final Logger LOGGER = LogManager.getLogger();
-    private final Potion potion;
+    private final WrapperPotion wrapperPotion;
     /** The duration of the potion effect */
     public int duration;
     /** The amplifier of the potion effect */
@@ -30,20 +30,20 @@ public class PotionEffect implements Comparable<PotionEffect> {
     /** List of ItemStack that can cure the potion effect **/
     private java.util.List<net.minecraft.item.ItemStack> curativeItems;
 
-    public PotionEffect(Potion potionIn) {
-        this(potionIn, 0, 0);
+    public PotionEffect(WrapperPotion wrapperPotionIn) {
+        this(wrapperPotionIn, 0, 0);
     }
 
-    public PotionEffect(Potion potionIn, int durationIn) {
-        this(potionIn, durationIn, 0);
+    public PotionEffect(WrapperPotion wrapperPotionIn, int durationIn) {
+        this(wrapperPotionIn, durationIn, 0);
     }
 
-    public PotionEffect(Potion potionIn, int durationIn, int amplifierIn) {
-        this(potionIn, durationIn, amplifierIn, false, true);
+    public PotionEffect(WrapperPotion wrapperPotionIn, int durationIn, int amplifierIn) {
+        this(wrapperPotionIn, durationIn, amplifierIn, false, true);
     }
 
-    public PotionEffect(Potion potionIn, int durationIn, int amplifierIn, boolean ambientIn, boolean showParticlesIn) {
-        this.potion = potionIn;
+    public PotionEffect(WrapperPotion wrapperPotionIn, int durationIn, int amplifierIn, boolean ambientIn, boolean showParticlesIn) {
+        this.wrapperPotion = wrapperPotionIn;
         this.duration = durationIn;
         this.amplifier = amplifierIn;
         this.isAmbient = ambientIn;
@@ -51,7 +51,7 @@ public class PotionEffect implements Comparable<PotionEffect> {
     }
 
     public PotionEffect(PotionEffect other) {
-        this.potion = other.potion;
+        this.wrapperPotion = other.wrapperPotion;
         this.duration = other.duration;
         this.amplifier = other.amplifier;
         this.isAmbient = other.isAmbient;
@@ -65,7 +65,7 @@ public class PotionEffect implements Comparable<PotionEffect> {
      * potion effect is assumed to be greater.
      */
     public void combine(PotionEffect other) {
-        if (this.potion != other.potion) {
+        if (this.wrapperPotion != other.wrapperPotion) {
             LOGGER.warn("This method should only be called for matching effects!");
         }
 
@@ -81,12 +81,12 @@ public class PotionEffect implements Comparable<PotionEffect> {
         this.showParticles = other.showParticles;
     }
 
-    public Potion getPotion() {
+    public WrapperPotion getPotion() {
         return this.getPotionRaw() == null ? null : this.getPotionRaw().delegate.get();
     }
 
-    private Potion getPotionRaw() {
-        return this.potion;
+    private WrapperPotion getPotionRaw() {
+        return this.wrapperPotion;
     }
 
     public int getDuration() {
@@ -113,7 +113,7 @@ public class PotionEffect implements Comparable<PotionEffect> {
 
     public boolean onUpdate(EntityLivingBase entityIn) {
         if (this.duration > 0) {
-            if (this.potion.isReady(this.duration, this.amplifier)) {
+            if (this.wrapperPotion.isReady(this.duration, this.amplifier)) {
                 this.performEffect(entityIn);
             }
 
@@ -129,12 +129,12 @@ public class PotionEffect implements Comparable<PotionEffect> {
 
     public void performEffect(EntityLivingBase entityIn) {
         if (this.duration > 0) {
-            this.potion.performEffect(entityIn, this.amplifier);
+            this.wrapperPotion.performEffect(entityIn, this.amplifier);
         }
     }
 
     public String getEffectName() {
-        return this.potion.getName();
+        return this.wrapperPotion.getName();
     }
 
     public String toString() {
@@ -167,12 +167,12 @@ public class PotionEffect implements Comparable<PotionEffect> {
             return this.duration == potioneffect.duration && this.amplifier == potioneffect.amplifier
                 && this.isSplashPotion == potioneffect.isSplashPotion
                 && this.isAmbient == potioneffect.isAmbient
-                && this.potion.equals(potioneffect.potion);
+                && this.wrapperPotion.equals(potioneffect.wrapperPotion);
         }
     }
 
     public int hashCode() {
-        int i = this.potion.hashCode();
+        int i = this.wrapperPotion.hashCode();
         i = 31 * i + this.duration;
         i = 31 * i + this.amplifier;
         i = 31 * i + (this.isSplashPotion ? 1 : 0);
@@ -184,7 +184,7 @@ public class PotionEffect implements Comparable<PotionEffect> {
      * Write a custom potion effect to a potion item's NBT data.
      */
     public NBTTagCompound writeCustomPotionEffectToNBT(NBTTagCompound nbt) {
-        nbt.setByte("Id", (byte) Potion.getIdFromPotion(this.getPotion()));
+        nbt.setByte("Id", (byte) WrapperPotion.getIdFromPotion(this.getPotion()));
         nbt.setByte("Amplifier", (byte) this.getAmplifier());
         nbt.setInteger("Duration", this.getDuration());
         nbt.setBoolean("Ambient", this.getIsAmbient());
@@ -198,9 +198,9 @@ public class PotionEffect implements Comparable<PotionEffect> {
      */
     public static PotionEffect readCustomPotionEffectFromNBT(NBTTagCompound nbt) {
         int i = nbt.getByte("Id") & 0xFF;
-        Potion potion = Potion.getPotionById(i);
+        WrapperPotion wrapperPotion = WrapperPotion.getPotionById(i);
 
-        if (potion == null) {
+        if (wrapperPotion == null) {
             return null;
         } else {
             int j = nbt.getByte("Amplifier");
@@ -212,7 +212,7 @@ public class PotionEffect implements Comparable<PotionEffect> {
                 flag1 = nbt.getBoolean("ShowParticles");
             }
 
-            return readCurativeItems(new PotionEffect(potion, k, j < 0 ? 0 : j, flag, flag1), nbt);
+            return readCurativeItems(new PotionEffect(wrapperPotion, k, j < 0 ? 0 : j, flag, flag1), nbt);
         }
     }
 
@@ -258,7 +258,7 @@ public class PotionEffect implements Comparable<PotionEffect> {
     /* ======================================== FORGE START ===================================== */
     /***
      * Returns a list of curative items for the potion effect
-     * By default, this list is initialized using {@link Potion#getCurativeItems}
+     * By default, this list is initialized using {@link WrapperPotion#getCurativeItems}
      *
      * @return The list (ItemStack) of curative items for the potion effect
      */
@@ -272,7 +272,7 @@ public class PotionEffect implements Comparable<PotionEffect> {
 
     /***
      * Checks the given ItemStack to see if it is in the list of curative items for the potion effect
-     * 
+     *
      * @param stack The ItemStack being checked against the list of curative items for this PotionEffect
      * @return true if the given ItemStack is in the list of curative items for this PotionEffect, false otherwise
      */
@@ -288,7 +288,7 @@ public class PotionEffect implements Comparable<PotionEffect> {
 
     /***
      * Sets the list of curative items for this potion effect, overwriting any already present
-     * 
+     *
      * @param curativeItems The list of ItemStacks being set to the potion effect
      */
     public void setCurativeItems(java.util.List<net.minecraft.item.ItemStack> curativeItems) {
@@ -297,7 +297,7 @@ public class PotionEffect implements Comparable<PotionEffect> {
 
     /***
      * Adds the given stack to the list of curative items for this PotionEffect
-     * 
+     *
      * @param stack The ItemStack being added to the curative item list
      */
     public void addCurativeItem(net.minecraft.item.ItemStack stack) {

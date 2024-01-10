@@ -21,10 +21,10 @@ public class ChunkCache implements IWrapperBlockAccess {
     /** set by !chunk.getAreLevelsEmpty */
     protected boolean empty;
     /** Reference to the World object. */
-    protected WrapperWorld wrapperWorld;
+    protected World world;
 
-    public ChunkCache(WrapperWorld wrapperWorldIn, BlockPos posFromIn, BlockPos posToIn, int subIn) {
-        this.wrapperWorld = wrapperWorldIn;
+    public ChunkCache(World worldIn, BlockPos posFromIn, BlockPos posToIn, int subIn) {
+        this.world = worldIn;
         this.chunkX = posFromIn.getX() - subIn >> 4;
         this.chunkZ = posFromIn.getZ() - subIn >> 4;
         int i = posToIn.getX() + subIn >> 4;
@@ -34,7 +34,7 @@ public class ChunkCache implements IWrapperBlockAccess {
 
         for (int k = this.chunkX; k <= i; ++k) {
             for (int l = this.chunkZ; l <= j; ++l) {
-                this.chunkArray[k - this.chunkX][l - this.chunkZ] = wrapperWorldIn.getChunkFromChunkCoords(k, l);
+                this.chunkArray[k - this.chunkX][l - this.chunkZ] = worldIn.getChunkFromChunkCoords(k, l);
             }
         }
 
@@ -105,12 +105,12 @@ public class ChunkCache implements IWrapperBlockAccess {
         int i = (pos.getX() >> 4) - this.chunkX;
         int j = (pos.getZ() >> 4) - this.chunkZ;
         if (!withinBounds(i, j)) return net.minecraft.init.Biomes.PLAINS;
-        return this.chunkArray[i][j].getBiome(pos, this.wrapperWorld.getBiomeProvider());
+        return this.chunkArray[i][j].getBiome(pos, this.world.getBiomeProvider());
     }
 
     @SideOnly(Side.CLIENT)
     private int getLightForExt(EnumSkyBlock type, BlockPos pos) {
-        if (type == EnumSkyBlock.SKY && !this.wrapperWorld.provider.hasSkyLight()) {
+        if (type == EnumSkyBlock.SKY && !this.world.provider.hasSkyLight()) {
             return 0;
         } else if (pos.getY() >= 0 && pos.getY() < 256) {
             if (this.getBlockState(pos)
@@ -170,7 +170,7 @@ public class ChunkCache implements IWrapperBlockAccess {
 
     @SideOnly(Side.CLIENT)
     public WorldType getWorldType() {
-        return this.wrapperWorld.getWorldType();
+        return this.world.getWorldType();
     }
 
     @Override

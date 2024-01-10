@@ -35,8 +35,8 @@ public final class WorldEntitySpawner {
      * adds all chunks within the spawn radius of the players to eligibleChunksForSpawning. pars: the world,
      * hostileCreatures, passiveCreatures. returns number of eligible chunks.
      */
-    public int findChunksForSpawning(WrapperWorldServer worldServerIn, boolean spawnHostileMobs,
-        boolean spawnPeacefulMobs, boolean spawnOnSetTickRate) {
+    public int findChunksForSpawning(WorldServer worldServerIn, boolean spawnHostileMobs,
+                                     boolean spawnPeacefulMobs, boolean spawnOnSetTickRate) {
         if (!spawnHostileMobs && !spawnPeacefulMobs) {
             return 0;
         } else {
@@ -197,12 +197,12 @@ public final class WorldEntitySpawner {
         }
     }
 
-    private static BlockPos getRandomChunkPosition(WrapperWorld wrapperWorldIn, int x, int z) {
-        Chunk chunk = wrapperWorldIn.getChunkFromChunkCoords(x, z);
-        int i = x * 16 + wrapperWorldIn.rand.nextInt(16);
-        int j = z * 16 + wrapperWorldIn.rand.nextInt(16);
+    private static BlockPos getRandomChunkPosition(World worldIn, int x, int z) {
+        Chunk chunk = worldIn.getChunkFromChunkCoords(x, z);
+        int i = x * 16 + worldIn.rand.nextInt(16);
+        int j = z * 16 + worldIn.rand.nextInt(16);
         int k = MathHelper.roundUp(chunk.getHeight(new BlockPos(i, 0, j)) + 1, 16);
-        int l = wrapperWorldIn.rand.nextInt(k > 0 ? k : chunk.getTopFilledSegment() + 16 - 1);
+        int l = worldIn.rand.nextInt(k > 0 ? k : chunk.getTopFilledSegment() + 16 - 1);
         return new BlockPos(i, l, j);
     }
 
@@ -220,38 +220,38 @@ public final class WorldEntitySpawner {
     }
 
     public static boolean canCreatureTypeSpawnAtLocation(EntityLiving.SpawnPlacementType spawnPlacementTypeIn,
-        WrapperWorld wrapperWorldIn, BlockPos pos) {
-        if (!wrapperWorldIn.getWorldBorder()
+                                                         World worldIn, BlockPos pos) {
+        if (!worldIn.getWorldBorder()
             .contains(pos)) {
             return false;
         } else {
-            return spawnPlacementTypeIn.canSpawnAt(wrapperWorldIn, pos);
+            return spawnPlacementTypeIn.canSpawnAt(worldIn, pos);
         }
     }
 
     public static boolean canCreatureTypeSpawnBody(EntityLiving.SpawnPlacementType spawnPlacementTypeIn,
-        WrapperWorld wrapperWorldIn, BlockPos pos) {
+                                                   World worldIn, BlockPos pos) {
         {
-            IWrapperBlockState iblockstate = wrapperWorldIn.getBlockState(pos);
+            IWrapperBlockState iblockstate = worldIn.getBlockState(pos);
 
             if (spawnPlacementTypeIn == EntityLiving.SpawnPlacementType.IN_WATER) {
-                return iblockstate.getMaterial() == Material.WATER && wrapperWorldIn.getBlockState(pos.down())
+                return iblockstate.getMaterial() == Material.WATER && worldIn.getBlockState(pos.down())
                     .getMaterial() == Material.WATER
-                    && !wrapperWorldIn.getBlockState(pos.up())
+                    && !worldIn.getBlockState(pos.up())
                         .isNormalCube();
             } else {
                 BlockPos blockpos = pos.down();
-                IWrapperBlockState state = wrapperWorldIn.getBlockState(blockpos);
+                IWrapperBlockState state = worldIn.getBlockState(blockpos);
 
                 if (!state.getBlock()
-                    .canCreatureSpawn(state, wrapperWorldIn, blockpos, spawnPlacementTypeIn)) {
+                    .canCreatureSpawn(state, worldIn, blockpos, spawnPlacementTypeIn)) {
                     return false;
                 } else {
-                    Block block = wrapperWorldIn.getBlockState(blockpos)
+                    Block block = worldIn.getBlockState(blockpos)
                         .getBlock();
                     boolean flag = block != Blocks.BEDROCK && block != Blocks.BARRIER;
                     return flag && isValidEmptySpawnBlock(iblockstate)
-                        && isValidEmptySpawnBlock(wrapperWorldIn.getBlockState(pos.up()));
+                        && isValidEmptySpawnBlock(worldIn.getBlockState(pos.up()));
                 }
             }
         }
@@ -265,14 +265,14 @@ public final class WorldEntitySpawner {
      * @param diameterX The X diameter of the rectangle to spawn mobs in
      * @param diameterZ The Z diameter of the rectangle to spawn mobs in
      */
-    public static void performWorldGenSpawning(WrapperWorld wrapperWorldIn, Biome biomeIn, int centerX, int centerZ,
-        int diameterX, int diameterZ, Random randomIn) {
+    public static void performWorldGenSpawning(World worldIn, Biome biomeIn, int centerX, int centerZ,
+                                               int diameterX, int diameterZ, Random randomIn) {
         List<Biome.SpawnListEntry> list = biomeIn.getSpawnableList(EnumCreatureType.CREATURE);
 
         if (!list.isEmpty()) {
             while (randomIn.nextFloat() < biomeIn.getSpawningChance()) {
                 Biome.SpawnListEntry biome$spawnlistentry = (Biome.SpawnListEntry) WeightedRandom
-                    .getRandomItem(wrapperWorldIn.rand, list);
+                    .getRandomItem(worldIn.rand, list);
                 int i = biome$spawnlistentry.minGroupCount
                     + randomIn.nextInt(1 + biome$spawnlistentry.maxGroupCount - biome$spawnlistentry.minGroupCount);
                 IEntityLivingData ientitylivingdata = null;
@@ -285,16 +285,16 @@ public final class WorldEntitySpawner {
                     boolean flag = false;
 
                     for (int k1 = 0; !flag && k1 < 4; ++k1) {
-                        BlockPos blockpos = wrapperWorldIn.getTopSolidOrLiquidBlock(new BlockPos(j, 0, k));
+                        BlockPos blockpos = worldIn.getTopSolidOrLiquidBlock(new BlockPos(j, 0, k));
 
                         if (canCreatureTypeSpawnAtLocation(
                             EntityLiving.SpawnPlacementType.ON_GROUND,
-                            wrapperWorldIn,
+                            worldIn,
                             blockpos)) {
                             EntityLiving entityliving;
 
                             try {
-                                entityliving = biome$spawnlistentry.newInstance(wrapperWorldIn);
+                                entityliving = biome$spawnlistentry.newInstance(worldIn);
                             } catch (Exception exception) {
                                 exception.printStackTrace();
                                 continue;
@@ -302,7 +302,7 @@ public final class WorldEntitySpawner {
 
                             if (net.minecraftforge.event.ForgeEventFactory.canEntitySpawn(
                                 entityliving,
-                                wrapperWorldIn,
+                                worldIn,
                                 j + 0.5f,
                                 (float) blockpos.getY(),
                                 k + 0.5f,
@@ -313,9 +313,9 @@ public final class WorldEntitySpawner {
                                 (double) ((float) k + 0.5F),
                                 randomIn.nextFloat() * 360.0F,
                                 0.0F);
-                            wrapperWorldIn.spawnEntity(entityliving);
+                            worldIn.spawnEntity(entityliving);
                             ientitylivingdata = entityliving.onInitialSpawn(
-                                wrapperWorldIn.getDifficultyForLocation(new BlockPos(entityliving)),
+                                worldIn.getDifficultyForLocation(new BlockPos(entityliving)),
                                 ientitylivingdata);
                             flag = true;
                         }
